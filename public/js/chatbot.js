@@ -41,12 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const appendMessage = (text, isUser = false) => {
     const div = document.createElement('div');
     div.classList.add(isUser ? 'user-msg' : 'bot-msg', 'fade-in');
-    
+
     if (!isUser) {
       div.innerHTML = '<span class="typing-dots">...</span>';
       bodyArea.appendChild(div);
       bodyArea.scrollTop = bodyArea.scrollHeight;
-      
+
       setTimeout(() => {
         div.innerText = text;
         bodyArea.scrollTop = bodyArea.scrollHeight;
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sendMessage = async () => {
     const text = inputField.value.trim();
     if (!text) return;
-    
+
     appendMessage(text, true);
     inputField.value = '';
 

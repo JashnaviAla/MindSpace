@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,8 +31,8 @@
       height: 180px;
       border-radius: 50%;
       background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-      box-shadow: 0 0 60px rgba(161, 196, 253, 0.4), 
-                  inset 0 0 40px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 60px rgba(161, 196, 253, 0.4),
+        inset 0 0 40px rgba(255, 255, 255, 0.5);
       position: relative;
       z-index: 5;
       animation: aurora-pulse 8s infinite alternate ease-in-out;
@@ -47,18 +48,41 @@
       animation: aurora-rotate 15s infinite linear;
     }
 
-    .aura-1 { background: #ed64a6; animation-delay: -2s; }
-    .aura-2 { background: #4a90e2; animation-delay: -5s; }
-    .aura-3 { background: #48bb78; animation-delay: -8s; }
+    .aura-1 {
+      background: #ed64a6;
+      animation-delay: -2s;
+    }
+
+    .aura-2 {
+      background: #4a90e2;
+      animation-delay: -5s;
+    }
+
+    .aura-3 {
+      background: #48bb78;
+      animation-delay: -8s;
+    }
 
     @keyframes aurora-pulse {
-      0% { transform: scale(1); filter: brightness(1); }
-      100% { transform: scale(1.2); filter: brightness(1.2); }
+      0% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+
+      100% {
+        transform: scale(1.2);
+        filter: brightness(1.2);
+      }
     }
 
     @keyframes aurora-rotate {
-      from { transform: rotate(0deg) scale(1); }
-      to { transform: rotate(360deg) scale(1.4); }
+      from {
+        transform: rotate(0deg) scale(1);
+      }
+
+      to {
+        transform: rotate(360deg) scale(1.4);
+      }
     }
 
     /* Soundscape Grid */
@@ -81,12 +105,12 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      border: 1px solid rgba(0,0,0,0.03);
+      border: 1px solid rgba(0, 0, 0, 0.03);
     }
 
     .sound-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
       border-color: var(--primary);
     }
 
@@ -96,9 +120,13 @@
       border-color: var(--primary);
     }
 
-    .sound-card.active .text-muted { color: rgba(255,255,255,0.8); }
+    .sound-card.active .text-muted {
+      color: rgba(255, 255, 255, 0.8);
+    }
 
-    .icon-large { font-size: 2rem; }
+    .icon-large {
+      font-size: 2rem;
+    }
 
     /* Circular Timer */
     .timer-display {
@@ -116,10 +144,12 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <a href="home.html" class="logo">
-      <img src="images/logo.png" alt="MindSpace" style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
+      <img src="images/logo.png" alt="MindSpace"
+        style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
       MindSpace
     </a>
     <nav>
@@ -215,6 +245,7 @@
       startBtn.innerText = 'Start Session';
     });
 
+    let currentAudio = null;
     const soundUrls = {
       ocean: 'https://assets.mixkit.co/active_storage/sfx/2561/2561-preview.mp3',
       rain: 'https://assets.mixkit.co/active_storage/sfx/2438/2438-preview.mp3',
@@ -222,45 +253,40 @@
       zen: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3'
     };
 
-    const audioPlayer = new Audio();
-    audioPlayer.loop = true;
-
     soundCards.forEach(card => {
-      card.addEventListener('click', async () => {
+      card.addEventListener('click', () => {
         const soundType = card.getAttribute('data-sound');
-        
+
         if (card.classList.contains('active')) {
-          audioPlayer.pause();
+          if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+          }
           card.classList.remove('active');
           return;
+        }
+
+        if (currentAudio) {
+          currentAudio.pause();
         }
 
         soundCards.forEach(c => c.classList.remove('active'));
         card.classList.add('active');
 
-        try {
-          audioPlayer.pause();
-          audioPlayer.src = soundUrls[soundType];
-          audioPlayer.load(); 
-          
-          const playPromise = audioPlayer.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-          }
-        } catch (err) {
-          console.error('Playback intercepted:', err);
-          if (err.name === 'NotAllowedError') {
-             alert('Please click anywhere on the page once to enable the soundscapes!');
-          }
-        }
+        currentAudio = new Audio(soundUrls[soundType]);
+        currentAudio.loop = true;
+        currentAudio.play().catch(err => {
+          console.warn('Playback failed:', err);
+        });
       });
     });
 
     document.getElementById('btn-logout').addEventListener('click', () => {
-      audioPlayer.pause();
+      if (currentAudio) currentAudio.pause();
       localStorage.removeItem('mindspace_user');
       window.location.href = 'index.html';
     });
   </script>
 </body>
+
 </html>

@@ -52,7 +52,7 @@ router.post('/user/login', async (req, res) => {
         user.streakCount = 1;
       } else {
         const diffDays = Math.round((today - lastDay) / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays === 0) {
           // Same day, streak stays
         } else if (diffDays === 1) {
@@ -63,7 +63,7 @@ router.post('/user/login', async (req, res) => {
           user.streakCount = 1;
         }
       }
-      
+
       user.lastActiveDate = today;
       await user.save();
     }
@@ -83,7 +83,7 @@ router.post('/auth/register', async (req, res) => {
 
     // Use username as anonymousId if not provided, or generate one
     const anonymousId = 'user_' + Math.random().toString(36).substr(2, 9);
-    
+
     // In production, bcrypt password here. For this demo, we keep it simple.
     const user = new User({ username, password, role: role || 'user', anonymousId, streakCount: 1 });
     await user.save();
@@ -136,7 +136,7 @@ router.post('/mood', async (req, res) => {
       stressLevel: getStressLevel(emoji)
     });
     await mood.save();
-    
+
     // Update streak in database
     if (userId) {
       const user = await User.findById(userId);
@@ -145,10 +145,10 @@ router.post('/mood', async (req, res) => {
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const lastActive = user.lastActiveDate ? new Date(user.lastActiveDate) : null;
         const lastDay = lastActive ? new Date(lastActive.getFullYear(), lastActive.getMonth(), lastActive.getDate()) : null;
-        
+
         const diffMs = lastDay ? (today - lastDay) : null;
         const diffDays = diffMs !== null ? Math.round(diffMs / (1000 * 60 * 60 * 24)) : null;
-        
+
         if (diffDays === null) {
           user.streakCount = 1; // first ever mood
         } else if (diffDays === 0) {
@@ -159,18 +159,18 @@ router.post('/mood', async (req, res) => {
           // missed a day (diffDays > 1), streak was 0, now using again = 1
           user.streakCount = 1;
         }
-        
+
         user.lastActiveDate = now;
         await user.save();
       }
     }
-    
+
     // Generate simple chatbot-like response / suggestion based on this mood
     const suggestions = getSuggestions(emoji);
-    
+
     // Return updated user streak
     const updatedUser = userId ? await User.findById(userId) : null;
-    
+
     res.json({ success: true, mood, suggestions, streak: updatedUser ? updatedUser.streakCount : 0 });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -204,7 +204,7 @@ router.get('/mood/:userId', async (req, res) => {
 router.post('/diary/sync', async (req, res) => {
   try {
     const { userId, entries } = req.body; // array of { title, content, date }
-    
+
     // Save all to db
     const savedEntries = [];
     for (const entry of entries) {
@@ -217,7 +217,7 @@ router.post('/diary/sync', async (req, res) => {
       await newEntry.save();
       savedEntries.push(newEntry);
     }
-    
+
     res.json({ success: true, count: savedEntries.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -281,10 +281,10 @@ router.get('/admin/stats', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'Unauthorized. Admin token required.' });
-    
+
     const tokenParts = authHeader.split(' ');
     if (tokenParts.length !== 2) return res.status(401).json({ error: 'Invalid token format.' });
-    
+
     const userId = tokenParts[1];
     const user = await User.findById(userId);
     if (!user || user.role !== 'admin') {
@@ -293,37 +293,37 @@ router.get('/admin/stats', async (req, res) => {
 
     const totalUsers = await User.countDocuments();
     const totalMoods = await Mood.countDocuments();
-    
+
     // Calculate average stress level
     const agg = await Mood.aggregate([{ $group: { _id: null, avgStress: { $avg: '$stressLevel' } } }]);
     const avgStress = agg.length > 0 ? agg[0].avgStress : 0;
-    
+
     // Get high stress alerts
     const alerts = await Mood.find({ stressLevel: { $gte: 8 } }).sort({ date: -1 }).limit(10).populate('userId', 'anonymousId');
-    
+
     // Calculate Stress Distribution for Doughnut chart
     const stressDist = await Mood.aggregate([
       { $group: { _id: '$stressLevel', count: { $sum: 1 } } },
       { $sort: { _id: 1 } }
     ]);
-    
+
     // Calculate Moods over time for Line chart
     const moodsTime = await Mood.aggregate([
-      { 
-        $group: { 
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, 
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
           count: { $sum: 1 },
           avgStress: { $avg: '$stressLevel' }
-        } 
+        }
       },
       { $sort: { _id: 1 } },
       { $limit: 14 }
     ]);
-    
-    res.json({ 
-      totalUsers, 
-      totalMoods, 
-      avgStress, 
+
+    res.json({
+      totalUsers,
+      totalMoods,
+      avgStress,
       recentAlerts: alerts,
       stressDistribution: stressDist,
       moodsOverTime: moodsTime
