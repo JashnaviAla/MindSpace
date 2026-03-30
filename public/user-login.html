@@ -32,6 +32,10 @@
       <button type="submit" id="submit-auth" class="btn btn-accent" style="width: 100%; margin-top: 1rem;">Sign In</button>
     </form>
 
+    <div style="text-align: right; margin-top: 0.8rem;">
+      <a href="#" id="forgot-link" style="font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 500;">Forgot Password?</a>
+    </div>
+
     <div style="margin: 2rem 0; text-transform: uppercase; font-size: 0.8rem; color: var(--text-light); letter-spacing: 2px;">or</div>
 
     <!-- Anonymous Flow -->
@@ -47,6 +51,74 @@
   <!-- Error display -->
   <div id="auth-error" style="color: red; margin-top: 1rem; text-align: center;"></div>
 
+  <!-- Forgot Password Modal -->
+  <div id="reset-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; display:none; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:24px; padding:2.5rem; max-width:420px; width:90%; box-shadow:0 25px 50px rgba(0,0,0,0.15); text-align:center; position:relative;">
+      <button id="close-reset" style="position:absolute; top:12px; right:18px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
+      <h3 style="margin-bottom:0.5rem;">Reset Password</h3>
+      <p style="color:#6b7280; font-size:0.9rem; margin-bottom:1.5rem;">Enter your username and choose a new password.</p>
+      <input type="text" id="reset-username" placeholder="Your username" style="width:100%; padding:12px; margin-bottom:1rem; border:2px solid #e5e7eb; border-radius:12px; font-size:1rem; box-sizing:border-box;">
+      <input type="password" id="reset-new-password" placeholder="New password" style="width:100%; padding:12px; margin-bottom:1rem; border:2px solid #e5e7eb; border-radius:12px; font-size:1rem; box-sizing:border-box;">
+      <button id="reset-submit" class="btn btn-accent" style="width:100%; padding:12px; border-radius:12px; font-size:1rem;">Reset Password</button>
+      <div id="reset-msg" style="margin-top:1rem; font-size:0.9rem;"></div>
+    </div>
+  </div>
+
   <script src="js/login.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('reset-modal');
+      const forgotLink = document.getElementById('forgot-link');
+      const closeBtn = document.getElementById('close-reset');
+      const resetSubmit = document.getElementById('reset-submit');
+      const resetMsg = document.getElementById('reset-msg');
+
+      forgotLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.style.display = 'flex';
+      });
+
+      closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        resetMsg.innerText = '';
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+          resetMsg.innerText = '';
+        }
+      });
+
+      resetSubmit.addEventListener('click', async () => {
+        const username = document.getElementById('reset-username').value.trim();
+        const newPassword = document.getElementById('reset-new-password').value.trim();
+        if (!username || !newPassword) {
+          resetMsg.style.color = 'red';
+          resetMsg.innerText = 'Please fill in both fields.';
+          return;
+        }
+        try {
+          const res = await fetch('http://localhost:3000/api/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, newPassword })
+          });
+          const data = await res.json();
+          if (data.success) {
+            resetMsg.style.color = '#16a34a';
+            resetMsg.innerText = '✅ ' + data.message;
+            setTimeout(() => { modal.style.display = 'none'; resetMsg.innerText = ''; }, 2000);
+          } else {
+            resetMsg.style.color = 'red';
+            resetMsg.innerText = data.error;
+          }
+        } catch (err) {
+          resetMsg.style.color = 'red';
+          resetMsg.innerText = 'Network error. Try again.';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

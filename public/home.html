@@ -14,6 +14,7 @@
       <a href="diary.html">Diary</a>
       <a href="chat.html">Chat</a>
       <a href="relax.html">Relax</a>
+      <a href="#" id="btn-logout" style="color: #d90429; font-weight: 600;">Logout</a>
     </nav>
     <div class="streak-badge" title="Daily Streak">
       🔥 <span id="streak-count">0</span>
@@ -50,5 +51,14 @@
 
   <script src="js/app.js"></script>
   <script src="js/chatbot.js"></script>
+  <script>
+    document.getElementById('btn-logout').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('mindspace_user');
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('mindspace_anon_id');
+      window.location.href = 'index.html';
+    });
+  </script>
 </body>
 </html>
