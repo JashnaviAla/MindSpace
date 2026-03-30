@@ -46,25 +46,72 @@ app.use(express.static('public'));
 app.use('/api', apiRoutes);
 
 // Socket.io for Real-time Chat
+// --- 1-on-1 Matchmaking Engine ---
+let waitingQueue = []; 
+const activeRooms = {}; 
+
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
-  // Join anonymous chat room
-  socket.on('join_chat', () => {
-    socket.join('anonymous_room');
-    socket.emit('message', { user: 'System', text: 'Welcome to the anonymous chat! It is a safe space.' });
-    socket.to('anonymous_room').emit('message', { user: 'System', text: 'A new user joined the chat.' });
+  // Helper: tear down room and cleanly disconnect both parties from it
+  const endRoom = (roomId) => {
+    socket.to(roomId).emit('partner_left', { text: 'Stranger has disconnected.' });
+    for (const [sId, rId] of Object.entries(activeRooms)) {
+      if (rId === roomId) {
+        const s = io.sockets.sockets.get(sId);
+        if (s) s.leave(roomId);
+        delete activeRooms[sId];
+      }
+    }
+  };
+
+  socket.on('find_match', () => {
+    // Ensure not already in queue or room
+    waitingQueue = waitingQueue.filter(id => id !== socket.id);
+    if (activeRooms[socket.id]) return;
+
+    if (waitingQueue.length > 0) {
+      // Pull the longest waiting person
+      const partnerId = waitingQueue.shift();
+      const partnerSocket = io.sockets.sockets.get(partnerId);
+      
+      if (partnerSocket) {
+        const roomHash = 'room_' + Math.random().toString(36).substr(2, 9);
+        
+        socket.join(roomHash);
+        partnerSocket.join(roomHash);
+        
+        activeRooms[socket.id] = roomHash;
+        activeRooms[partnerId] = roomHash;
+        
+        io.to(roomHash).emit('chat_start', { text: 'You are now connected with a random stranger!' });
+      } else {
+        waitingQueue.push(socket.id);
+        socket.emit('waiting', { text: 'Waiting for a stranger...' });
+      }
+    } else {
+      waitingQueue.push(socket.id);
+      socket.emit('waiting', { text: 'Waiting for a stranger to connect...' });
+    }
   });
 
-  // Handle incoming messages
   socket.on('send_message', (data) => {
-    // data should contain { text: '...', emoji: '...' }
-    io.to('anonymous_room').emit('message', { user: 'Anonymous', text: data.text, emoji: data.emoji });
+    const roomId = activeRooms[socket.id];
+    if (roomId) {
+      socket.to(roomId).emit('message', { user: 'Stranger', text: data.text });
+    }
+  });
+
+  // User manually hits 'Next' button
+  socket.on('skip_partner', () => {
+    const roomId = activeRooms[socket.id];
+    if (roomId) endRoom(roomId);
   });
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-    socket.to('anonymous_room').emit('message', { user: 'System', text: 'A user left the chat.' });
+    waitingQueue = waitingQueue.filter(id => id !== socket.id);
+    const roomId = activeRooms[socket.id];
+    if (roomId) endRoom(roomId);
   });
 });
 

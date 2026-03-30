@@ -18,8 +18,15 @@
   </header>
 
   <main class="glass-container fade-in">
-    <h2>Anonymous Support Chat</h2>
-    <p class="text-muted">A safe space to talk with others. You are completely anonymous.</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+      <h2 style="margin: 0;">1-on-1 Support Chat</h2>
+      <button id="skip-btn" class="btn" style="background: rgba(217, 4, 41, 0.1); color: #d90429; display: none; padding: 0.5rem 1rem;">Skip Partner ⏭</button>
+    </div>
+    <p class="text-muted" style="margin-bottom: 1rem;">You are completely anonymous. No data is saved.</p>
+    
+    <div id="chat-status" style="background: rgba(56, 178, 172, 0.1); color: var(--accent); padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 1rem; font-weight: bold;">
+      Connecting...
+    </div>
 
     <div class="chat-window" id="chat-window">
       <!-- Messages appear here -->
