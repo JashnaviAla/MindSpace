@@ -2,38 +2,147 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Diary | MindSpace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Diary | MindSpace</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .diary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .diary-card {
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 24px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .diary-card:hover {
+      transform: translateY(-5px);
+      background: white;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    }
+
+    .diary-card h4 {
+      margin: 0 0 0.5rem;
+      font-size: 1.2rem;
+      color: var(--text-dark);
+    }
+
+    .diary-card .date {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+
+    .diary-card .content-preview {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: var(--text-light);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .sync-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .online { background: #d1fae5; color: #065f46; }
+    .offline { background: #fee2e2; color: #991b1b; }
+
+    #diary-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: transparent;
+      border-bottom: 2px solid rgba(0,0,0,0.05);
+      border-radius: 0;
+      padding: 0.5rem 0;
+      margin-bottom: 1.5rem;
+    }
+    #diary-title:focus { border-color: var(--primary); background: transparent; box-shadow: none; }
+
+    #diary-content {
+      background: rgba(255,255,255,0.3);
+      line-height: 1.8;
+      font-size: 1.1rem;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <a href="home.html" class="logo"><img src="images/logo.png" alt="MindSpace" style="height: 35px; width: 35px; border-radius: 8px; vertical-align: middle;"> MindSpace</a>
+    <a href="home.html" class="logo">
+      <img src="images/logo.png" alt="MindSpace" style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
+      MindSpace
+    </a>
     <nav>
       <a href="home.html">Home</a>
       <a href="diary.html" class="active">Diary</a>
       <a href="chat.html">Chat</a>
       <a href="relax.html">Relax</a>
+      <a href="heal.html">Heal</a>
+      <a href="#" id="btn-logout" style="color: #ef4444; font-weight: 700;">Logout</a>
     </nav>
   </header>
 
-  <main class="glass-container fade-in">
-    <h2>Personal Diary</h2>
-    <p class="text-muted">Write your thoughts. Works offline too!</p>
-
-    <div style="margin-top: 1rem;">
-      <input type="text" id="diary-title" placeholder="Entry Title (e.g., A good day)">
-      <textarea id="diary-content" rows="6" placeholder="Dear Diary..."></textarea>
-      <button id="save-diary" class="btn btn-accent">Save Entry</button>
-      <span id="sync-status" class="text-muted" style="margin-left: 10px;">🟢 Online</span>
+  <main class="glass-container fade-in" style="max-width: 900px;">
+    <div class="diary-header">
+      <div>
+        <h2 style="margin: 0;">My Sanctuary</h2>
+        <p class="text-muted">A private space for your honest reflections.</p>
+      </div>
+      <div id="sync-status" class="sync-badge online">🟢 Online</div>
     </div>
 
-    <h3 style="margin-top: 2rem;">Previous Entries</h3>
-    <div id="diary-list" style="margin-top: 1rem;">
-      <!-- Entries populated by JS -->
+    <div style="margin-top: 2rem;">
+      <input type="text" id="diary-title" placeholder="Give your entry a title...">
+      <textarea id="diary-content" rows="8" placeholder="Start writing something beautiful..."></textarea>
+      
+      <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+        <button id="save-diary" class="btn btn-accent" style="padding: 0.8rem 2.5rem; border-radius: 20px;">
+          🖋 Save Today's Reflection
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top: 4rem; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 3rem;">
+      <h3 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.5rem;">📚</span> Past Entries
+      </h3>
+      <div id="diary-list">
+        <!-- Entries populated by JS -->
+      </div>
     </div>
   </main>
 
   <script src="js/diary.js"></script>
   <script src="js/chatbot.js"></script>
+  <script>
+    // Simple status UI update
+    window.addEventListener('online', () => {
+      const s = document.getElementById('sync-status');
+      s.innerText = '🟢 Online';
+      s.className = 'sync-badge online';
+    });
+    window.addEventListener('offline', () => {
+      const s = document.getElementById('sync-status');
+      s.innerText = '🔴 Offline';
+      s.className = 'sync-badge offline';
+    });
+  </script>
 </body>
 </html>

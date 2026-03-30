@@ -2,82 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relax | MindSpace</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .breathing-circle {
-      width: 250px;
-      height: 250px;
-      border-radius: 50%;
-      background: radial-gradient(circle, var(--accent) 0%, rgba(56, 178, 172, 0.2) 100%);
-      margin: 60px auto;
+    body {
+      background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .relax-container {
+      text-align: center;
+      max-width: 600px;
+      padding: 4rem 2rem;
+    }
+
+    .breathing-sphere-wrapper {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 4rem auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-size: 1.8rem;
-      font-weight: 600;
-      box-shadow: 0 0 30px rgba(56, 178, 172, 0.4);
+    }
+
+    .breathing-sphere {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(74, 144, 226, 0.4));
+      box-shadow: 0 20px 50px rgba(74, 144, 226, 0.2), inset 0 -10px 20px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dark);
+      font-size: 1.5rem;
+      font-weight: 700;
+      transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Outer glow ring */
+    .outer-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid rgba(74, 144, 226, 0.1);
+      border-radius: 50%;
       transition: all 4s ease-in-out;
+      transform: scale(0.8);
+      opacity: 0;
     }
-    .inhale {
-      transform: scale(1.6);
-      background: radial-gradient(circle, var(--primary) 0%, rgba(107, 70, 193, 0.2) 100%);
-      box-shadow: 0 0 50px rgba(107, 70, 193, 0.6);
+
+    .inhale .breathing-sphere {
+      transform: scale(1.5);
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(74, 144, 226, 0.6));
+      box-shadow: 0 40px 80px rgba(74, 144, 226, 0.3), inset 0 -15px 30px rgba(0,0,0,0.05);
     }
-    .exhale {
+
+    .inhale .outer-ring {
+      transform: scale(1.8);
+      opacity: 1;
+      border-color: rgba(74, 144, 226, 0.3);
+    }
+
+    .exhale .breathing-sphere {
       transform: scale(1);
+    }
+
+    .exhale .outer-ring {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+
+    #breathe-instruction {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-top: 2rem;
+      min-height: 2.5rem;
+    }
+
+    .btn-relax {
+      margin-top: 3rem;
+      padding: 1.2rem 3rem;
+      font-size: 1.1rem;
+      border-radius: 24px;
+      letter-spacing: 0.5px;
     }
   </style>
 </head>
 <body>
   <header>
-    <a href="home.html" class="logo"><img src="images/logo.png" alt="MindSpace" style="height: 35px; width: 35px; border-radius: 8px; vertical-align: middle;"> MindSpace</a>
+    <a href="home.html" class="logo">
+      <img src="images/logo.png" alt="MindSpace" style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
+      MindSpace
+    </a>
     <nav>
       <a href="home.html">Home</a>
       <a href="diary.html">Diary</a>
       <a href="chat.html">Chat</a>
       <a href="relax.html" class="active">Relax</a>
+      <a href="heal.html">Heal</a>
+      <a href="#" id="btn-logout" style="color: #ef4444; font-weight: 700;">Logout</a>
     </nav>
   </header>
 
-  <main class="glass-container fade-in" style="text-align: center;">
-    <h2>Breathing Exercise</h2>
-    <p class="text-muted" style="margin-bottom: 2rem;">Follow the circle to regulate your breathing and lower your stress.</p>
+  <main class="glass-container relax-container fade-in">
+    <h2 style="font-size: 2.5rem; letter-spacing: -0.04em;">Quiet Your Mind</h2>
+    <p class="text-muted">A scientific 4-4 breathing pattern to reset your nervous system.</p>
 
-    <div class="breathing-circle" id="breathe-circle">Ready</div>
+    <div class="breathing-sphere-wrapper" id="sphere-wrapper">
+      <div class="outer-ring"></div>
+      <div class="breathing-sphere" id="breathe-circle"></div>
+    </div>
+
+    <div id="breathe-instruction">Ready to start?</div>
     
-    <button id="start-breathe" class="btn btn-accent" style="margin-top: 2rem; font-size: 1.1rem; padding: 1rem 2rem;">Start Exercise</button>
+    <button id="start-breathe" class="btn btn-accent btn-relax">Begin Session</button>
   </main>
 
   <script>
-    const circle = document.getElementById('breathe-circle');
+    const wrapper = document.getElementById('sphere-wrapper');
+    const instruction = document.getElementById('breathe-instruction');
     const startBtn = document.getElementById('start-breathe');
     let breathingInterval;
 
     startBtn.addEventListener('click', () => {
       if (startBtn.innerText === 'Stop') {
         clearInterval(breathingInterval);
-        circle.className = 'breathing-circle';
-        circle.innerText = 'Ready';
-        startBtn.innerText = 'Start Exercise';
+        wrapper.className = 'breathing-sphere-wrapper';
+        instruction.innerText = 'Session Ended';
+        startBtn.innerText = 'Begin Session';
         return;
       }
 
       startBtn.innerText = 'Stop';
-      breatheAnimation();
-      breathingInterval = setInterval(breatheAnimation, 8000); // 4s inhale, 4s exhale
+      breatheCycle();
+      breathingInterval = setInterval(breatheCycle, 8000); // 4s inhale, 4s exhale
     });
 
-    function breatheAnimation() {
-      circle.innerText = 'Breathe In...';
-      circle.className = 'breathing-circle inhale';
+    function breatheCycle() {
+      instruction.innerText = 'Deep Inhale...';
+      wrapper.className = 'breathing-sphere-wrapper inhale';
       
       setTimeout(() => {
-        circle.innerText = 'Breathe Out...';
-        circle.className = 'breathing-circle exhale';
+        instruction.innerText = 'Soft Exhale...';
+        wrapper.className = 'breathing-sphere-wrapper exhale';
       }, 4000);
     }
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      localStorage.removeItem('mindspace_user');
+      window.location.href = 'index.html';
+    });
   </script>
   <script src="js/chatbot.js"></script>
 </body>

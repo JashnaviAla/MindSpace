@@ -3,55 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MindSpace | Smart Mental Health</title>
+  <title>Home | MindSpace</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Dashboard Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2.5rem;
+      max-width: 1300px;
+      margin: 0 auto 4rem;
+      padding: 0 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Refined Card Styles */
+    .glass-card {
+      background: white;
+      border-radius: 32px;
+      padding: 2.5rem;
+      border: 1px solid rgba(0,0,0,0.03);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+      margin-bottom: 2rem;
+    }
+
+    /* Streak Card (Elite Style) */
+    .streak-card {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      border-radius: 32px;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 20px 40px rgba(253, 160, 133, 0.2);
+      color: white;
+      transition: transform 0.4s ease;
+    }
+    
+    .streak-card:hover { transform: scale(1.02); }
+
+    .streak-card .streak-fire {
+      font-size: 4rem;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+    }
+
+    .streak-card h3 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: white;
+    }
+
+    .streak-card p {
+      margin: 0;
+      opacity: 0.95;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Calendar Refinements */
+    .cal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .cal-header h3 { font-size: 1.15rem; margin: 0; }
+    .cal-nav-btn {
+      background: #f1f5f9;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .cal-nav-btn:hover { background: #e2e8f0; }
+
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      cursor: default;
+      background: #f8fafc;
+      color: var(--text-light);
+    }
+    .cal-day.empty { background: transparent; }
+    .cal-day.has-mood {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      cursor: pointer;
+    }
+    .cal-day.has-mood:hover { transform: scale(1.1); box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+    .cal-day.today { border: 2px solid var(--primary); color: var(--primary); background: white; }
+    .cal-day .mood-emoji { font-size: 1rem; margin-top: 2px; }
+
+    /* Main Card Layout Fixes */
+    main.glass-container {
+      margin: 0;
+      width: 100%;
+      max-width: none;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <a href="home.html" class="logo"><img src="images/logo.png" alt="MindSpace" style="height: 35px; width: 35px; border-radius: 8px; vertical-align: middle;"> MindSpace</a>
+    <a href="home.html" class="logo">
+      <img src="images/logo.png" alt="MindSpace" style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
+      MindSpace
+    </a>
     <nav>
       <a href="home.html" class="active">Home</a>
       <a href="diary.html">Diary</a>
       <a href="chat.html">Chat</a>
       <a href="relax.html">Relax</a>
-      <a href="#" id="btn-logout" style="color: #d90429; font-weight: 600;">Logout</a>
+      <a href="heal.html">Heal</a>
+      <a href="#" id="btn-logout" style="color: #ef4444; font-weight: 700;">Logout</a>
     </nav>
     <div class="streak-badge" title="Daily Streak">
       🔥 <span id="streak-count">0</span>
     </div>
   </header>
 
-  <main class="glass-container fade-in">
-    <h2>How are you feeling today?</h2>
-    <p class="text-muted">Select an emoji that best matches your mood.</p>
-    
-    <div class="mood-grid">
-      <button class="mood-btn" data-emoji="😭">😭</button>
-      <button class="mood-btn" data-emoji="😟">😟</button>
-      <button class="mood-btn" data-emoji="😐">😐</button>
-      <button class="mood-btn" data-emoji="😊">😊</button>
-      <button class="mood-btn" data-emoji="🤩">🤩</button>
+  <div class="dashboard-grid fade-in">
+    <!-- Left Column: Mood Tracker & Suggestions -->
+    <div class="main-content">
+      <main class="glass-container" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 2.2rem; margin-bottom: 0.5rem;">How are you feeling today?</h2>
+        <p class="text-muted" style="margin-bottom: 2.5rem;">Consistency is the key to deep self-awareness.</p>
+        
+        <div class="mood-grid">
+          <button class="mood-btn" data-emoji="😭">😭</button>
+          <button class="mood-btn" data-emoji="😟">😟</button>
+          <button class="mood-btn" data-emoji="😐">😐</button>
+          <button class="mood-btn" data-emoji="😊">😊</button>
+          <button class="mood-btn" data-emoji="🤩">🤩</button>
+        </div>
+
+        <div style="margin-top: 3rem;">
+          <textarea id="mood-note" rows="3" placeholder="Click an emoji above, then share more if you'd like..."></textarea>
+          <button id="submit-mood" class="btn btn-accent" style="width: 100%; padding: 1.2rem;">Log Today's Mood</button>
+        </div>
+      </main>
+
+      <aside id="suggestions-box" class="glass-container hidden">
+        <h3 style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.5rem;">💡</span> Personal Insights
+        </h3>
+        <ul id="suggestions-list" style="margin-top: 1.5rem;"></ul>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(0,0,0,0.05)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+            <span style="font-size: 1.2rem;">🤖</span>
+            <h4 style="margin: 0; font-size: 1rem; color: var(--text-light);">AI Support Reflection</h4>
+          </div>
+          <p id="chatbot-response" style="font-style: italic; color: var(--primary); line-height: 1.6; font-weight: 500;"></p>
+        </div>
+      </aside>
     </div>
 
-    <div style="margin-top: 2rem;">
-      <textarea id="mood-note" rows="3" placeholder="Care to share more? (Optional)"></textarea>
-      <button id="submit-mood" class="btn btn-accent" style="width: 100%">Log Mood</button>
-    </div>
-  </main>
+    <!-- Right Column: Sidebar -->
+    <div class="sidebar-content">
+      <!-- Streak Card -->
+      <div class="streak-card">
+        <div class="streak-fire">🔥</div>
+        <div class="streak-info">
+          <h3><span id="streak-big">0</span> Day Streak</h3>
+          <p>You're building a healthy habit!</p>
+        </div>
+      </div>
 
-  <aside id="suggestions-box" class="glass-container fade-in hidden">
-    <h3>💡 Suggestions for You</h3>
-    <ul id="suggestions-list"></ul>
-    
-    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border)">
-      <h4>🤖 AI Support Bot</h4>
-      <p id="chatbot-response" style="font-style: italic; color: var(--primary)"></p>
+      <!-- Mood Calendar Card -->
+      <div class="calendar-container glass-card">
+        <div class="cal-header">
+          <h3 id="cal-title">Month Year</h3>
+          <div style="display: flex; gap: 8px;">
+            <button class="cal-nav-btn" id="cal-prev">‹</button>
+            <button class="cal-nav-btn" id="cal-next">›</button>
+          </div>
+        </div>
+        <div class="cal-weekdays">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
     </div>
-  </aside>
+  </div>
 
   <script src="js/app.js"></script>
   <script src="js/chatbot.js"></script>
   <script>
+    const CAL_API = 'http://localhost:3000/api';
+    let calYear, calMonth;
+    let moodCalendarData = [];
+
     document.getElementById('btn-logout').addEventListener('click', (e) => {
       e.preventDefault();
       localStorage.removeItem('mindspace_user');
@@ -59,6 +245,98 @@
       localStorage.removeItem('mindspace_anon_id');
       window.location.href = 'index.html';
     });
+
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+
+    document.getElementById('cal-prev').addEventListener('click', () => {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCalendar();
+    });
+
+    document.getElementById('cal-next').addEventListener('click', () => {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCalendar();
+    });
+
+    async function loadCalendarData() {
+      try {
+        const user = JSON.parse(localStorage.getItem('mindspace_user'));
+        if (!user || !user._id) return;
+
+        const res = await fetch(`${CAL_API}/mood/calendar/${user._id}`);
+        moodCalendarData = await res.json();
+
+        const uRes = await fetch(`${CAL_API}/user/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ anonymousId: user.anonymousId })
+        });
+        const freshUser = await uRes.json();
+        localStorage.setItem('mindspace_user', JSON.stringify(freshUser));
+
+        document.getElementById('streak-count').innerText = freshUser.streakCount || 0;
+        document.getElementById('streak-big').innerText = freshUser.streakCount || 0;
+
+        renderCalendar();
+      } catch (err) {
+        console.warn('Calendar load failed:', err);
+        renderCalendar();
+      }
+    }
+
+    function renderCalendar() {
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      document.getElementById('cal-title').innerText = `${months[calMonth]} ${calYear}`;
+
+      const grid = document.getElementById('cal-grid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const today = new Date();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'cal-day empty';
+        grid.appendChild(empty);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'cal-day';
+        if (d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear()) {
+          cell.classList.add('today');
+        }
+
+        const dayMoods = moodCalendarData.filter(m => {
+          const mDate = new Date(m.date);
+          return mDate.getFullYear() === calYear && mDate.getMonth() === calMonth && mDate.getDate() === d;
+        });
+
+        if (dayMoods.length > 0) {
+          cell.classList.add('has-mood');
+          cell.innerHTML = `<span>${d}</span><span class="mood-emoji">${dayMoods[0].emoji}</span>`;
+        } else {
+          cell.innerText = d;
+        }
+        grid.appendChild(cell);
+      }
+    }
+
+    // Refresh observer
+    const submitBtn = document.getElementById('submit-mood');
+    const observer = new MutationObserver(() => {
+      if (submitBtn.innerText === 'Saved!') {
+        setTimeout(loadCalendarData, 800);
+      }
+    });
+    observer.observe(submitBtn, { childList: true });
+
+    loadCalendarData();
   </script>
 </body>
 </html>

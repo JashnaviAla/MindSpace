@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heal | MindSpace</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .heal-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+
+    /* Aurora Healing Sphere */
+    .healing-aura-wrapper {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin: 3rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .healing-sphere {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+      box-shadow: 0 0 60px rgba(161, 196, 253, 0.4), 
+                  inset 0 0 40px rgba(255, 255, 255, 0.5);
+      position: relative;
+      z-index: 5;
+      animation: aurora-pulse 8s infinite alternate ease-in-out;
+    }
+
+    .aura-layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.5;
+      animation: aurora-rotate 15s infinite linear;
+    }
+
+    .aura-1 { background: #ed64a6; animation-delay: -2s; }
+    .aura-2 { background: #4a90e2; animation-delay: -5s; }
+    .aura-3 { background: #48bb78; animation-delay: -8s; }
+
+    @keyframes aurora-pulse {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.2); filter: brightness(1.2); }
+    }
+
+    @keyframes aurora-rotate {
+      from { transform: rotate(0deg) scale(1); }
+      to { transform: rotate(360deg) scale(1.4); }
+    }
+
+    /* Soundscape Grid */
+    .sound-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 500px;
+      margin: 3rem 0;
+    }
+
+    .sound-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .sound-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+      border-color: var(--primary);
+    }
+
+    .sound-card.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .sound-card.active .text-muted { color: rgba(255,255,255,0.8); }
+
+    .icon-large { font-size: 2rem; }
+
+    /* Circular Timer */
+    .timer-display {
+      font-size: 3.5rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      margin: 2rem 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="home.html" class="logo">
+      <img src="images/logo.png" alt="MindSpace" style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
+      MindSpace
+    </a>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="diary.html">Diary</a>
+      <a href="chat.html">Chat</a>
+      <a href="relax.html">Relax</a>
+      <a href="heal.html" class="active">Heal</a>
+      <a href="#" id="btn-logout" style="color: #ef4444; font-weight: 700;">Logout</a>
+    </nav>
+  </header>
+
+  <main class="glass-container heal-container fade-in">
+    <h2 style="font-size: 2.5rem; letter-spacing: -0.04em; margin-bottom: 0.5rem;">Healing Sanctuary</h2>
+    <p class="text-muted">Immerse yourself in frequencies of peace and recovery.</p>
+
+    <div class="healing-aura-wrapper">
+      <div class="aura-layer aura-1"></div>
+      <div class="aura-layer aura-2"></div>
+      <div class="aura-layer aura-3"></div>
+      <div class="healing-sphere"></div>
+    </div>
+
+    <div class="timer-display" id="timer">10:00</div>
+
+    <div class="controls">
+      <button class="btn" id="start-btn">Start Session</button>
+      <button class="btn btn-accent" id="reset-btn">Reset</button>
+    </div>
+
+    <div class="sound-grid">
+      <div class="sound-card" data-sound="ocean">
+        <span class="icon-large">🌊</span>
+        <strong>Ocean Mist</strong>
+        <span class="text-muted">Soft waves</span>
+      </div>
+      <div class="sound-card" data-sound="rain">
+        <span class="icon-large">🌧️</span>
+        <strong>Midnight Rain</strong>
+        <span class="text-muted">Gentle pitter</span>
+      </div>
+      <div class="sound-card" data-sound="forest">
+        <span class="icon-large">🌲</span>
+        <strong>Forest Echo</strong>
+        <span class="text-muted">Deep nature</span>
+      </div>
+      <div class="sound-card" data-sound="zen">
+        <span class="icon-large">🧘</span>
+        <strong>Zen Flute</strong>
+        <span class="text-muted">Meditation</span>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/chatbot.js"></script>
+  <script>
+    let timeLeft = 600;
+    let timerID = null;
+    const timerDisplay = document.getElementById('timer');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const soundCards = document.querySelectorAll('.sound-card');
+
+    function updateDisplay() {
+      const mins = Math.floor(timeLeft / 60);
+      const secs = timeLeft % 60;
+      timerDisplay.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    startBtn.addEventListener('click', () => {
+      if (timerID) {
+        clearInterval(timerID);
+        timerID = null;
+        startBtn.innerText = 'Resume';
+      } else {
+        startBtn.innerText = 'Pause';
+        timerID = setInterval(() => {
+          timeLeft--;
+          updateDisplay();
+          if (timeLeft <= 0) {
+            clearInterval(timerID);
+            alert('Your healing session is complete. Namaste.');
+          }
+        }, 1000);
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      clearInterval(timerID);
+      timerID = null;
+      timeLeft = 600;
+      updateDisplay();
+      startBtn.innerText = 'Start Session';
+    });
+
+    const soundUrls = {
+      ocean: 'https://assets.mixkit.co/active_storage/sfx/2561/2561-preview.mp3',
+      rain: 'https://assets.mixkit.co/active_storage/sfx/2438/2438-preview.mp3',
+      forest: 'https://assets.mixkit.co/active_storage/sfx/2444/2444-preview.mp3',
+      zen: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3'
+    };
+
+    const audioPlayer = new Audio();
+    audioPlayer.loop = true;
+
+    soundCards.forEach(card => {
+      card.addEventListener('click', async () => {
+        const soundType = card.getAttribute('data-sound');
+        
+        if (card.classList.contains('active')) {
+          audioPlayer.pause();
+          card.classList.remove('active');
+          return;
+        }
+
+        soundCards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+
+        try {
+          audioPlayer.pause();
+          audioPlayer.src = soundUrls[soundType];
+          audioPlayer.load(); 
+          
+          const playPromise = audioPlayer.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+          }
+        } catch (err) {
+          console.error('Playback intercepted:', err);
+          if (err.name === 'NotAllowedError') {
+             alert('Please click anywhere on the page once to enable the soundscapes!');
+          }
+        }
+      });
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      audioPlayer.pause();
+      localStorage.removeItem('mindspace_user');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

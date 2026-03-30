@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Mood = require('../models/Mood');
 const Diary = require('../models/Diary');
+const { GoogleGenAI } = require('@google/genai');
 
 // Helper to determine stress level from emoji
 const getStressLevel = (emoji) => {
@@ -30,30 +31,40 @@ const getSuggestions = (emoji) => {
 };
 
 // -- User Routes --
-// Get or create anonymous user, and update streak
+// Get or create anonymous user, update day streak on visit
 router.post('/user/login', async (req, res) => {
   try {
     const { anonymousId } = req.body;
     let user = await User.findOne({ anonymousId });
 
     const now = new Date();
-    
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
     if (!user) {
-      user = new User({ anonymousId, streakCount: 1, lastActiveDate: now, role: 'user' });
+      user = new User({ anonymousId, streakCount: 1, lastActiveDate: today, role: 'user' });
       await user.save();
     } else {
-      // Check streak (if last active was yesterday, increment. If older, reset to 1)
-      const lastActive = new Date(user.lastActiveDate);
-      const diffTime = Math.abs(now - lastActive);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-      
-      if (diffDays === 1 || (diffDays > 0 && lastActive.getDate() !== now.getDate())) {
-        // Technically next day
-        user.streakCount += 1;
-      } else if (diffDays > 1) {
+      const lastActive = user.lastActiveDate ? new Date(user.lastActiveDate) : null;
+      const lastDay = lastActive ? new Date(lastActive.getFullYear(), lastActive.getMonth(), lastActive.getDate()) : null;
+
+      if (!lastDay) {
+        // First time ever
         user.streakCount = 1;
+      } else {
+        const diffDays = Math.round((today - lastDay) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) {
+          // Same day, streak stays
+        } else if (diffDays === 1) {
+          // Consecutive day, increment
+          user.streakCount += 1;
+        } else {
+          // Missed a day (diffDays > 1), reset to 1 (they're using it now)
+          user.streakCount = 1;
+        }
       }
-      user.lastActiveDate = now;
+      
+      user.lastActiveDate = today;
       await user.save();
     }
 
@@ -88,20 +99,6 @@ router.post('/auth/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username, password });
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-    
-    // Update streak logic
-    const now = new Date();
-    const lastActive = new Date(user.lastActiveDate || now);
-    const diffTime = Math.abs(now - lastActive);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-    
-    if (diffDays === 1 || (diffDays > 0 && lastActive.getDate() !== now.getDate())) {
-      user.streakCount += 1;
-    } else if (diffDays > 1) {
-      user.streakCount = 1;
-    }
-    user.lastActiveDate = now;
-    await user.save();
 
     res.json({ success: true, user });
   } catch (err) {
@@ -140,10 +137,54 @@ router.post('/mood', async (req, res) => {
     });
     await mood.save();
     
+    // Update streak in database
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const lastActive = user.lastActiveDate ? new Date(user.lastActiveDate) : null;
+        const lastDay = lastActive ? new Date(lastActive.getFullYear(), lastActive.getMonth(), lastActive.getDate()) : null;
+        
+        const diffMs = lastDay ? (today - lastDay) : null;
+        const diffDays = diffMs !== null ? Math.round(diffMs / (1000 * 60 * 60 * 24)) : null;
+        
+        if (diffDays === null) {
+          user.streakCount = 1; // first ever mood
+        } else if (diffDays === 0) {
+          // same day, streak stays the same
+        } else if (diffDays === 1) {
+          user.streakCount += 1; // consecutive day
+        } else {
+          // missed a day (diffDays > 1), streak was 0, now using again = 1
+          user.streakCount = 1;
+        }
+        
+        user.lastActiveDate = now;
+        await user.save();
+      }
+    }
+    
     // Generate simple chatbot-like response / suggestion based on this mood
     const suggestions = getSuggestions(emoji);
     
-    res.json({ success: true, mood, suggestions });
+    // Return updated user streak
+    const updatedUser = userId ? await User.findById(userId) : null;
+    
+    res.json({ success: true, mood, suggestions, streak: updatedUser ? updatedUser.streakCount : 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get moods for calendar view
+router.get('/mood/calendar/:userId', async (req, res) => {
+  try {
+    const moods = await Mood.find({ userId: req.params.userId })
+      .select('emoji date stressLevel')
+      .sort({ date: -1 })
+      .limit(90); // last 90 days max
+    res.json(moods);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -192,23 +233,47 @@ router.get('/diary/:userId', async (req, res) => {
   }
 });
 
-// -- Chatbot API --
-router.post('/chat', (req, res) => {
-  const { message } = req.body;
-  const lowerMsg = (message || '').toLowerCase();
-  let responseText = "I'm here for you. Could you tell me more about how you're feeling?";
-  
-  if (lowerMsg.includes('sad') || lowerMsg.includes('depress') || lowerMsg.includes('cry')) {
-    responseText = "I hear that you're feeling down. Remember that it's okay to not be okay. Maybe try writing down your feelings in the Diary, or use the Breathing Tool.";
-  } else if (lowerMsg.includes('anxi') || lowerMsg.includes('stress') || lowerMsg.includes('overwhelm')) {
-    responseText = "Stress can be overwhelming. Let's take a deep breath. Focus on inhaling for 4 seconds, and exhaling for 4 seconds. You've got this.";
-  } else if (lowerMsg.includes('happy') || lowerMsg.includes('good') || lowerMsg.includes('great')) {
-    responseText = "That's wonderful to hear! Keep up the positive energy and don't forget to keep your streak going.";
-  } else if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-    responseText = "Hello! I am MindSpace's bot. How are you feeling today?";
-  }
+// -- Chatbot API (Gemini 2.5 Flash) --
+router.post('/chat', async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ text: 'Message cannot be empty.' });
 
-  res.json({ text: responseText, user: 'Bot' });
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    // Fallback: if no API key, use keyword-based responses
+    if (!apiKey) {
+      const lowerMsg = message.toLowerCase();
+      let responseText = "I'm here for you. Could you tell me more about how you're feeling?";
+      if (lowerMsg.includes('sad') || lowerMsg.includes('depress') || lowerMsg.includes('cry')) {
+        responseText = "I hear that you're feeling down. It's okay to not be okay. Try writing in your Diary or using the Relax breathing tool.";
+      } else if (lowerMsg.includes('anxi') || lowerMsg.includes('stress') || lowerMsg.includes('overwhelm')) {
+        responseText = "Stress can be tough. Let's take a deep breath together — try the Relax section for a guided exercise.";
+      } else if (lowerMsg.includes('happy') || lowerMsg.includes('good') || lowerMsg.includes('great')) {
+        responseText = "That's wonderful! Keep up the positive energy and don't forget to log your streak today.";
+      } else if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
+        responseText = "Hi! I'm your MindSpace Guide. How are you feeling today?";
+      }
+      return res.json({ text: responseText, user: 'Bot' });
+    }
+
+    // AI-Powered response using Gemini 2.5 Flash (lazy init to avoid startup crash)
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: message,
+      config: {
+        systemInstruction: "You are the 'MindSpace Guide', a supportive, empathetic, and warm mental health companion for a youth mental health platform. " +
+          "Provide a safe, non-judgmental space. Suggest platform features (Diary, Relax Breathing, Mood Tracker, Heal Sanctuary) when helpful. " +
+          "Always remind users you are an AI and suggest professional help for severe distress. Keep responses under 3-4 sentences."
+      }
+    });
+
+    res.json({ text: response.text, user: 'Bot' });
+  } catch (err) {
+    console.error('Gemini API Error:', err.message);
+    res.json({ text: "I'm here for you, but I'm having a moment. How are you feeling?", user: 'Bot' });
+  }
 });
 
 // -- Admin/NGO Routes --

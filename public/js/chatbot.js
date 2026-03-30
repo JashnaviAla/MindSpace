@@ -4,18 +4,18 @@ document.addEventListener('DOMContentLoaded', () => {
     <div id="floating-chatbot">
       <div id="chat-widget-window" class="hidden">
         <div id="chat-widget-header">
-          MindSpace AI
-          <span id="close-chat-btn" style="cursor: pointer; font-size: 1.2rem;">&times;</span>
+          <span>🌿 MindSpace AI</span>
+          <span id="close-chat-btn" style="cursor: pointer; opacity: 0.5;">&times;</span>
         </div>
         <div id="chat-widget-body">
-          <div class="bot-msg">Hi! How can I support you today?</div>
+          <div class="bot-msg">Hi! I'm your MindSpace guide. How can I support your journey today?</div>
         </div>
         <div id="chat-widget-input-area">
-          <input type="text" id="chat-widget-input" placeholder="Type a message...">
+          <input type="text" id="chat-widget-input" placeholder="How are you feeling?">
           <button id="chat-widget-send">Send</button>
         </div>
       </div>
-      <button id="chat-bubble-btn" style="float:right;">💬</button>
+      <button id="chat-bubble-btn">💬</button>
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', widgetHTML);
@@ -40,10 +40,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const appendMessage = (text, isUser = false) => {
     const div = document.createElement('div');
-    div.classList.add(isUser ? 'user-msg' : 'bot-msg');
-    div.innerText = text;
-    bodyArea.appendChild(div);
-    bodyArea.scrollTop = bodyArea.scrollHeight;
+    div.classList.add(isUser ? 'user-msg' : 'bot-msg', 'fade-in');
+    
+    if (!isUser) {
+      div.innerHTML = '<span class="typing-dots">...</span>';
+      bodyArea.appendChild(div);
+      bodyArea.scrollTop = bodyArea.scrollHeight;
+      
+      setTimeout(() => {
+        div.innerText = text;
+        bodyArea.scrollTop = bodyArea.scrollHeight;
+      }, 800);
+    } else {
+      div.innerText = text;
+      bodyArea.appendChild(div);
+      bodyArea.scrollTop = bodyArea.scrollHeight;
+    }
   };
 
   const sendMessage = async () => {
@@ -54,16 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
     inputField.value = '';
 
     try {
-      // Re-use the existing /api/chat route logic
-      const res = await fetch('http://localhost:3000/api/chat', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text })
       });
       const data = await res.json();
-      appendMessage(data.text || "I'm having trouble connecting right now.");
+      appendMessage(data.text || "I'm here for you. Could you tell me more?");
     } catch (err) {
-      appendMessage("Network error, unable to reach the AI.");
+      appendMessage("I'm having a little trouble connecting right now. Please try again.");
     }
   };
 

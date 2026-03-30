@@ -6,178 +6,179 @@
   <title>Welcome | MindSpace</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* Premium landing page specific styles */
-    .portal-container {
+    body {
+      background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+      background-attachment: fixed;
       display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
       justify-content: center;
-      margin-top: 3rem;
+      align-items: center;
+      padding: 0;
+      margin: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Animated background blob */
+    .bg-blob {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.1) 0%, transparent 70%);
+      filter: blur(80px);
+      z-index: -1;
+      border-radius: 50%;
+      animation: move 20s infinite alternate;
+    }
+
+    @keyframes move {
+      0% { transform: translate(-10%, -10%); }
+      100% { transform: translate(10%, 10%); }
+    }
+
+    .hero-section {
+      text-align: center;
+      z-index: 1;
+      padding: 2rem;
       width: 100%;
-      max-width: 900px;
+      max-width: 1000px;
+    }
+
+    .hero-title {
+      font-size: 4.5rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-light);
+      font-weight: 500;
+      margin-bottom: 4rem;
+    }
+
+    .portal-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2.5rem;
+      width: 100%;
     }
 
     .portal-card {
-      flex: 1;
-      min-width: 300px;
-      background: rgba(255, 255, 255, 0.45);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: 25px;
-      padding: 3rem 2rem;
-      text-align: center;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      cursor: pointer;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 35px;
+      padding: 3.5rem 2.5rem;
       text-decoration: none;
-      color: var(--text-dark);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(31, 38, 135, 0.1);
-    }
-
-    .portal-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 60%);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .portal-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(31, 38, 135, 0.2);
-    }
-
-    .portal-card:hover::before {
-      opacity: 1;
-      animation: rotateGradient 10s linear infinite;
-    }
-
-    @keyframes rotateGradient {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      transform: translateY(-12px);
+      background: white;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.08);
+      border-color: var(--primary);
     }
 
     .portal-icon {
-      font-size: 4.5rem;
-      margin-bottom: 1.5rem;
-      display: inline-block;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+      font-size: 3.5rem;
+      margin-bottom: 2rem;
+      background: #f8fafc;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 30px;
+      transition: all 0.5s ease;
+      color: #718096;
+    }
+
+    .portal-card:hover .portal-icon {
+      transform: scale(1.1) rotate(5deg);
+      background: var(--primary);
+      color: white;
     }
 
     .portal-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-weight: 700;
+      color: var(--text-dark);
       margin-bottom: 1rem;
-      background: var(--primary);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
     }
 
     .portal-desc {
       color: var(--text-light);
-      font-size: 1.05rem;
-      line-height: 1.5;
-      margin-bottom: 2rem;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+      text-align: center;
     }
 
     .portal-btn {
-      display: inline-block;
-      padding: 0.8rem 2rem;
-      background: var(--primary);
-      color: white;
-      border-radius: 30px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      padding: 1rem 2.5rem;
+      background: #f1f5f9;
+      color: var(--text-dark);
+      border-radius: 20px;
+      font-weight: 700;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(107, 70, 193, 0.3);
     }
 
     .portal-card:hover .portal-btn {
-      background: var(--primary-hover);
-      box-shadow: 0 6px 20px rgba(107, 70, 193, 0.5);
-    }
-
-    .portal-card.admin-card .portal-title {
-      background: #d90429;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .portal-card.admin-card .portal-btn {
-      background: #d90429;
-      box-shadow: 0 4px 15px rgba(217, 4, 41, 0.3);
-    }
-
-    .portal-card.admin-card:hover .portal-btn {
-      background: #a0031d;
-      box-shadow: 0 6px 20px rgba(217, 4, 41, 0.5);
-    }
-
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 800;
-      text-align: center;
-      margin-top: 2rem;
+      background: var(--primary);
       color: white;
-      text-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      animation: float 6s ease-in-out infinite;
-    }
-    
-    .hero-subtitle {
-      text-align: center;
-      font-size: 1.2rem;
-      color: rgba(255,255,255,0.9);
-      margin-top: 0.5rem;
-      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(74, 144, 226, 0.3);
     }
 
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
+    .admin-card:hover .portal-icon {
+      background: var(--accent) !important;
+    }
+    .admin-card:hover .portal-btn {
+      background: var(--accent) !important;
+      box-shadow: 0 10px 25px rgba(237, 100, 166, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: 3rem; }
+      body { overflow-y: auto; align-items: flex-start; padding-top: 4rem; }
     }
   </style>
 </head>
-<body style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
+<body>
+  <div class="bg-blob"></div>
   
-  <div class="fade-in" style="width: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 2rem;">
-    <h1 class="hero-title"><img src="images/logo.png" alt="MindSpace" style="height: 65px; width: 65px; border-radius: 16px; vertical-align: middle; margin-right: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">MindSpace</h1>
-    <p class="hero-subtitle">Your personal sanctuary for mental wellness.</p>
+  <div class="hero-section fade-in">
+    <div style="margin-bottom: 3rem;">
+      <img src="images/logo.png" alt="MindSpace" style="height: 80px; width: 80px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
+      <h1 class="hero-title">MindSpace</h1>
+      <p class="hero-subtitle">Your personal sanctuary for mental wellness.</p>
+    </div>
 
     <div class="portal-container">
-      
-      <!-- User Portal -->
       <a href="user-login.html" class="portal-card">
         <div class="portal-icon">🌿</div>
         <div class="portal-title">User Portal</div>
-        <div class="portal-desc">
-          Access your personal mood tracker, private offline diary, anonymous support chat, and guided breathing exercises.
-        </div>
-        <div class="portal-btn">Enter MindSpace</div>
+        <p class="portal-desc">
+          Daily mood tracking, personal diary, anonymous 1-on-1 support chat, and guided tools.
+        </p>
+        <div class="portal-btn">Get Started</div>
       </a>
 
-      <!-- Admin Portal -->
       <a href="admin-login.html" class="portal-card admin-card">
         <div class="portal-icon">📊</div>
         <div class="portal-title">NGO Admin</div>
-        <div class="portal-desc">
-          Secure staff dashboard to monitor global platform usage, view mental health trends, and track high-stress alerts.
-        </div>
-        <div class="portal-btn">Access Dashboard</div>
+        <p class="portal-desc">
+          Monitor platform usage, view anonymous wellness trends, and track high-stress alerts.
+        </p>
+        <div class="portal-btn">Access Metrics</div>
       </a>
-
     </div>
   </div>
-
 </body>
 </html>

@@ -2,43 +2,192 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Chat | MindSpace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anonymous Chat | MindSpace</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="/socket.io/socket.io.js"></script>
+  <style>
+    .chat-container {
+      max-width: 800px;
+      height: 700px;
+      display: flex;
+      flex-direction: column;
+      padding: 2.5rem;
+    }
+
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    #chat-status {
+      background: #f1f5f9;
+      color: var(--text-light);
+      padding: 0.6rem 1.2rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    #chat-status.matching {
+      background: rgba(74, 144, 226, 0.1);
+      color: var(--primary);
+    }
+    #chat-status.connected {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    .chat-window {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      background: rgba(0,0,0,0.02);
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scroll-behavior: smooth;
+    }
+
+    .msg-bubble {
+      max-width: 75%;
+      padding: 1rem 1.2rem;
+      border-radius: 18px;
+      font-size: 1rem;
+      line-height: 1.5;
+      position: relative;
+      animation: msgPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes msgPop {
+      from { opacity: 0; transform: scale(0.9) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .user-msg {
+      align-self: flex-end;
+      background: var(--primary);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .peer-msg {
+      align-self: flex-start;
+      background: white;
+      color: var(--text-dark);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      gap: 15px;
+      flex-shrink: 0;
+    }
+
+    #chat-input {
+      flex: 1;
+      margin-bottom: 0;
+      background: #f8fafc;
+      border: 1px solid #edf2f7;
+    }
+
+    #chat-input:focus {
+      background: white;
+      border-color: var(--primary);
+    }
+
+    .skip-btn {
+      background: #fee2e2;
+      color: #e11d48;
+      border-radius: 12px;
+      padding: 0.6rem 1.2rem;
+      font-weight: 700;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+    }
+    .skip-btn:hover { background: #fecaca; }
+
+    /* Hide the ugly scrollbar */
+    .chat-window::-webkit-scrollbar { width: 5px; }
+    .chat-window::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
+  </style>
 </head>
 <body>
   <header>
-    <a href="home.html" class="logo"><img src="images/logo.png" alt="MindSpace" style="height: 35px; width: 35px; border-radius: 8px; vertical-align: middle;"> MindSpace</a>
+    <a href="home.html" class="logo">
+      <img src="images/logo.png" alt="MindSpace" style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
+      MindSpace
+    </a>
     <nav>
       <a href="home.html">Home</a>
       <a href="diary.html">Diary</a>
       <a href="chat.html" class="active">Chat</a>
       <a href="relax.html">Relax</a>
+      <a href="heal.html">Heal</a>
+      <a href="#" id="btn-logout" style="color: #ef4444; font-weight: 700;">Logout</a>
     </nav>
   </header>
 
-  <main class="glass-container fade-in">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-      <h2 style="margin: 0;">1-on-1 Support Chat</h2>
-      <button id="skip-btn" class="btn" style="background: rgba(217, 4, 41, 0.1); color: #d90429; display: none; padding: 0.5rem 1rem;">Skip Partner ⏭</button>
+  <main class="glass-container chat-container fade-in">
+    <div class="chat-header">
+      <div>
+        <h2 style="margin:0; font-size: 1.8rem; letter-spacing: -0.04em;">Safe Connection</h2>
+        <p class="text-muted" style="margin:0; font-size: 0.9rem;">You are anonymous. Your peer is too.</p>
+      </div>
+      <div id="chat-status" class="matching">
+        <span class="status-pulse"></span> Searching for partner...
+      </div>
     </div>
-    <p class="text-muted" style="margin-bottom: 1rem;">You are completely anonymous. No data is saved.</p>
     
-    <div id="chat-status" style="background: rgba(56, 178, 172, 0.1); color: var(--accent); padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 1rem; font-weight: bold;">
-      Connecting...
-    </div>
-
     <div class="chat-window" id="chat-window">
-      <!-- Messages appear here -->
+      <!-- Loading state or info -->
+      <div style="text-align: center; margin: auto; padding: 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
+        <p class="text-muted" style="max-width: 300px; margin: 0 auto;">Establishing an encrypted, anonymous link for your session.</p>
+      </div>
     </div>
 
-    <div class="chat-input-area">
-      <input type="text" id="chat-input" placeholder="Type a message...">
-      <button id="send-chat" class="btn btn-accent">Send</button>
+    <div class="chat-input-wrapper">
+      <input type="text" id="chat-input" placeholder="Type naturally, be yourself..." autocomplete="off">
+      <button id="send-chat" class="btn btn-accent" style="padding: 0.8rem 2rem; border-radius: 18px;">Send ✨</button>
+      <button id="skip-btn" class="skip-btn" style="display: none;">Next Peer ⏭</button>
     </div>
   </main>
 
   <script src="js/chat.js"></script>
   <script src="js/chatbot.js"></script>
+  <script>
+    // Monitor logic from chat.js via DOM observers if needed
+    const statusBox = document.getElementById('chat-status');
+    const skipBtn = document.getElementById('skip-btn');
+    
+    // Smooth status transition (polled or triggered by chat.js logic)
+    const observer = new MutationObserver(() => {
+      const text = statusBox.innerText.toLowerCase();
+      if (text.includes('connected')) {
+        statusBox.className = 'connected';
+      } else if (text.includes('connecting') || text.includes('searching')) {
+        statusBox.className = 'matching';
+      }
+    });
+    observer.observe(statusBox, { childList: true });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      localStorage.removeItem('mindspace_user');
+      window.location.href = 'index.html';
+    });
+  </script>
 </body>
 </html>

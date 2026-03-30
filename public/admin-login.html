@@ -5,49 +5,135 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NGO Admin Login | MindSpace</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+    }
+
+    .auth-card {
+      max-width: 480px;
+      text-align: center;
+      border-color: rgba(225, 29, 72, 0.1);
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.6rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      padding-left: 0.5rem;
+    }
+
+    .admin-accent {
+      background: #e11d48 !important;
+      color: white !important;
+      box-shadow: 0 10px 25px rgba(225, 29, 72, 0.15) !important;
+    }
+
+    .admin-accent:hover {
+      background: #be123c !important;
+      box-shadow: 0 15px 30px rgba(225, 29, 72, 0.25) !important;
+    }
+
+    #admin-reset-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.1);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 32px;
+      padding: 3rem;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
-<body style="background: linear-gradient(135deg, #fcdada 0%, #f8b1b1 100%);">
-  <header style="justify-content: center; margin-bottom: 2rem;">
-    <a href="home.html" class="logo" style="font-size: 2.2rem; color: #d90429;"><img src="images/logo.png" alt="MindSpace" style="height: 40px; width: 40px; border-radius: 8px; vertical-align: middle;"> MindSpace Admin</a>
+<body>
+  <header style="justify-content: center;">
+    <a href="index.html" class="logo" style="font-size: 2.2rem; color: #e11d48;">
+      <img src="images/logo.png" alt="MindSpace" style="height: 45px; width: 45px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
+      MindSpace Admin
+    </a>
   </header>
 
-  <main class="glass-container fade-in" style="max-width: 500px; text-align: center; border-color: rgba(217, 4, 41, 0.3);">
-    <h2 style="color: #d90429;">Secure NGO Access</h2>
-    <p class="text-muted" style="margin-bottom: 2rem;">Authorized personnel only. Please sign in to access the analytics dashboard.</p>
+  <main class="glass-container auth-card fade-in">
+    <h2 style="color: #e11d48;">NGO Secure Access</h2>
+    <p class="text-muted" style="margin-bottom: 2.5rem;">Sign in to access platform-wide analytics and priority alerts.</p>
 
-    <!-- Admin Login Form -->
-    <form id="admin-auth-form" style="text-align: left;">
-      <label for="admin-username" style="font-weight: 500;">Admin ID</label>
-      <input type="text" id="admin-username" placeholder="Enter admin username" required>
+    <form id="admin-auth-form">
+      <div class="form-group">
+        <label for="admin-username">Admin ID</label>
+        <input type="text" id="admin-username" placeholder="Type admin username..." required>
+      </div>
       
-      <label for="admin-password" style="font-weight: 500;">Password</label>
-      <input type="password" id="admin-password" placeholder="Enter admin password" required>
+      <div class="form-group">
+        <label for="admin-password">Password</label>
+        <input type="password" id="admin-password" placeholder="••••••••" required>
+      </div>
       
-      <button type="submit" id="submit-admin-auth" class="btn" style="width: 100%; margin-top: 1rem; background: #d90429;">Access Dashboard</button>
+      <button type="submit" id="submit-admin-auth" class="btn admin-accent" style="width: 100%; margin-top: 1rem;">Access Dashboard</button>
     </form>
 
-    <div style="text-align: right; margin-top: 0.8rem;">
-      <a href="#" id="admin-forgot-link" style="font-size: 0.85rem; color: #d90429; text-decoration: none; font-weight: 500;">Forgot Password?</a>
+    <div style="text-align: center; margin-top: 1.2rem;">
+      <a href="#" id="admin-forgot-link" style="font-size: 0.9rem; color: #e11d48; text-decoration: none; font-weight: 600;">Forgot Password?</a>
     </div>
 
-    <div style="margin-top: 1.5rem;">
-      <a href="index.html" style="font-size: 0.9rem; color: var(--text-dark); text-decoration: none;">&larr; Return to Home</a>
+    <div style="margin-top: 2.5rem;">
+      <a href="index.html" style="font-size: 0.95rem; color: var(--text-light); text-decoration: none; font-weight: 500;">&larr; Back to Landing</a>
     </div>
-
   </main>
 
-  <div id="admin-auth-error" style="color: #d90429; margin-top: 1rem; text-align: center; font-weight: bold;"></div>
+  <div id="admin-auth-error" style="color: #e11d48; margin-top: 1.5rem; font-weight: 600;"></div>
 
   <!-- Forgot Password Modal for Admin -->
-  <div id="admin-reset-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; display:none; align-items:center; justify-content:center;">
-    <div style="background:white; border-radius:24px; padding:2.5rem; max-width:420px; width:90%; box-shadow:0 25px 50px rgba(0,0,0,0.15); text-align:center; position:relative;">
-      <button id="admin-close-reset" style="position:absolute; top:12px; right:18px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
-      <h3 style="margin-bottom:0.5rem; color:#d90429;">Reset Admin Password</h3>
-      <p style="color:#6b7280; font-size:0.9rem; margin-bottom:1.5rem;">Enter your Admin ID and choose a new password.</p>
-      <input type="text" id="admin-reset-username" placeholder="Admin username" style="width:100%; padding:12px; margin-bottom:1rem; border:2px solid #e5e7eb; border-radius:12px; font-size:1rem; box-sizing:border-box;">
-      <input type="password" id="admin-reset-new-password" placeholder="New password" style="width:100%; padding:12px; margin-bottom:1rem; border:2px solid #e5e7eb; border-radius:12px; font-size:1rem; box-sizing:border-box;">
-      <button id="admin-reset-submit" class="btn" style="width:100%; padding:12px; border-radius:12px; font-size:1rem; background:#d90429;">Reset Password</button>
-      <div id="admin-reset-msg" style="margin-top:1rem; font-size:0.9rem;"></div>
+  <div id="admin-reset-modal">
+    <div class="modal-content fade-in">
+      <button id="admin-close-reset" class="close-btn">&times;</button>
+      <h3 style="color: #e11d48;">Reset Admin Password</h3>
+      <p class="text-muted" style="margin-bottom: 2rem;">Authorized reset only. Please verify your ID.</p>
+      
+      <div style="text-align: left;">
+        <input type="text" id="admin-reset-username" placeholder="Admin username">
+        <input type="password" id="admin-reset-new-password" placeholder="New master password">
+      </div>
+      
+      <button id="admin-reset-submit" class="btn admin-accent" style="width: 100%;">Update Password</button>
+      <div id="admin-reset-msg" style="margin-top: 1.2rem; font-weight: 600;"></div>
     </div>
   </div>
 
@@ -70,18 +156,11 @@
         resetMsg.innerText = '';
       });
 
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.style.display = 'none';
-          resetMsg.innerText = '';
-        }
-      });
-
       resetSubmit.addEventListener('click', async () => {
         const username = document.getElementById('admin-reset-username').value.trim();
         const newPassword = document.getElementById('admin-reset-new-password').value.trim();
         if (!username || !newPassword) {
-          resetMsg.style.color = 'red';
+          resetMsg.style.color = '#e11d48';
           resetMsg.innerText = 'Please fill in both fields.';
           return;
         }
@@ -93,15 +172,15 @@
           });
           const data = await res.json();
           if (data.success) {
-            resetMsg.style.color = '#16a34a';
+            resetMsg.style.color = '#10b981';
             resetMsg.innerText = '✅ ' + data.message;
             setTimeout(() => { modal.style.display = 'none'; resetMsg.innerText = ''; }, 2000);
           } else {
-            resetMsg.style.color = 'red';
+            resetMsg.style.color = '#e11d48';
             resetMsg.innerText = data.error;
           }
         } catch (err) {
-          resetMsg.style.color = 'red';
+          resetMsg.style.color = '#e11d48';
           resetMsg.innerText = 'Network error. Try again.';
         }
       });

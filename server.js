@@ -117,5 +117,16 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`✅ Server running at http://localhost:${PORT}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Port ${PORT} is already in use.`);
+    console.error(`   Run this command to fix it: taskkill /F /IM node.exe`);
+    console.error(`   Then run: npm start\n`);
+    process.exit(1);
+  } else {
+    throw err;
+  }
 });

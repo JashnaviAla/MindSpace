@@ -5,67 +5,218 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | MindSpace</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-card {
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .tab-container {
+      display: flex;
+      background: rgba(255, 255, 255, 0.4);
+      padding: 0.4rem;
+      border-radius: 20px;
+      margin-bottom: 2.5rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.8rem;
+      border: none;
+      background: transparent;
+      border-radius: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.6rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      padding-left: 0.5rem;
+    }
+
+    .anon-divider {
+      margin: 2.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--text-light);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .anon-divider::before, .anon-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(0,0,0,0.05);
+    }
+
+    .btn-anon {
+      width: 100%;
+      background: white;
+      color: var(--text-dark);
+      border: 1px solid rgba(0,0,0,0.05);
+      font-weight: 700;
+    }
+
+    .btn-anon:hover {
+      background: #f8fafc;
+      border-color: var(--primary);
+    }
+
+    /* Modal Styling */
+    #reset-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.1);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 32px;
+      padding: 3rem;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
-  <header style="justify-content: center; margin-bottom: 2rem;">
-    <a href="#" class="logo" style="font-size: 2.2rem;"><img src="images/logo.png" alt="MindSpace" style="height: 40px; width: 40px; border-radius: 8px; vertical-align: middle;"> MindSpace</a>
+  <header style="justify-content: center;">
+    <a href="index.html" class="logo" style="font-size: 2.2rem;">
+      <img src="images/logo.png" alt="MindSpace" style="height: 45px; width: 45px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
+      MindSpace
+    </a>
   </header>
 
-  <main class="glass-container fade-in" style="max-width: 500px; text-align: center;">
-    <h2>Welcome</h2>
-    <p class="text-muted" style="margin-bottom: 2rem;">Sign in or create an account to persist your progress across devices.</p>
+  <main class="glass-container auth-card fade-in">
+    <h2 id="auth-title">Welcome back</h2>
+    <p class="text-muted" style="margin-bottom: 2.5rem;">Securely access your mental health sanctuary.</p>
 
-    <!-- Options -->
-    <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-      <button id="tab-login" class="btn btn-accent" style="flex: 1; margin-right: 5px; border-radius: 10px;">Login</button>
-      <button id="tab-register" class="btn" style="flex: 1; margin-left: 5px; border-radius: 10px; background: rgba(255,255,255,0.4); color: var(--text-dark);">Register</button>
+    <div class="tab-container">
+      <button id="tab-login" class="tab-btn active">Sign In</button>
+      <button id="tab-register" class="tab-btn">Create Account</button>
     </div>
 
-    <!-- Login/Register Form -->
-    <form id="auth-form" style="text-align: left;">
-      <label for="username" style="font-weight: 500;">Username / Admin ID</label>
-      <input type="text" id="username" placeholder="Enter your username" required>
+    <form id="auth-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Type your username..." required>
+      </div>
       
-      <label for="password" style="font-weight: 500;">Password</label>
-      <input type="password" id="password" placeholder="Enter your password" required>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
       
       <button type="submit" id="submit-auth" class="btn btn-accent" style="width: 100%; margin-top: 1rem;">Sign In</button>
     </form>
 
-    <div style="text-align: right; margin-top: 0.8rem;">
-      <a href="#" id="forgot-link" style="font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 500;">Forgot Password?</a>
+    <div style="text-align: center; margin-top: 1.2rem;">
+      <a href="#" id="forgot-link" style="font-size: 0.9rem; color: var(--primary); text-decoration: none; font-weight: 600;">Forgot Password?</a>
     </div>
 
-    <div style="margin: 2rem 0; text-transform: uppercase; font-size: 0.8rem; color: var(--text-light); letter-spacing: 2px;">or</div>
+    <div class="anon-divider">or explore</div>
 
-    <!-- Anonymous Flow -->
-    <button id="btn-anonymous" class="btn" style="width: 100%; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: var(--text-dark);">
-      Continue Anonymously
+    <button id="btn-anonymous" class="btn btn-anon">
+      ✨ Continue Anonymously
     </button>
     
-    <div style="margin-top: 2rem;">
-      <a href="index.html" style="font-size: 0.9rem; color: var(--text-dark); text-decoration: none;">&larr; Return to Home</a>
+    <div style="margin-top: 2.5rem;">
+      <a href="index.html" style="font-size: 0.95rem; color: var(--text-light); text-decoration: none; font-weight: 500;">&larr; Back to Landing</a>
     </div>
   </main>
 
-  <!-- Error display -->
-  <div id="auth-error" style="color: red; margin-top: 1rem; text-align: center;"></div>
+  <div id="auth-error" style="color: #ef4444; margin-top: 1.5rem; font-weight: 600;"></div>
 
   <!-- Forgot Password Modal -->
-  <div id="reset-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; display:none; align-items:center; justify-content:center;">
-    <div style="background:white; border-radius:24px; padding:2.5rem; max-width:420px; width:90%; box-shadow:0 25px 50px rgba(0,0,0,0.15); text-align:center; position:relative;">
-      <button id="close-reset" style="position:absolute; top:12px; right:18px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
-      <h3 style="margin-bottom:0.5rem;">Reset Password</h3>
-      <p style="color:#6b7280; font-size:0.9rem; margin-bottom:1.5rem;">Enter your username and choose a new password.</p>
-      <input type="text" id="reset-username" placeholder="Your username" style="width:100%; padding:12px; margin-bottom:1rem; border:2px solid #e5e7eb; border-radius:12px; font-size:1rem; box-sizing:border-box;">
-      <input type="password" id="reset-new-password" placeholder="New password" style="width:100%; padding:12px; margin-bottom:1rem; border:2px solid #e5e7eb; border-radius:12px; font-size:1rem; box-sizing:border-box;">
-      <button id="reset-submit" class="btn btn-accent" style="width:100%; padding:12px; border-radius:12px; font-size:1rem;">Reset Password</button>
-      <div id="reset-msg" style="margin-top:1rem; font-size:0.9rem;"></div>
+  <div id="reset-modal">
+    <div class="modal-content fade-in">
+      <button id="close-reset" class="close-btn">&times;</button>
+      <h3>Reset Password</h3>
+      <p class="text-muted" style="margin-bottom: 2rem;">Enter your details to create a new password.</p>
+      
+      <div style="text-align: left;">
+        <input type="text" id="reset-username" placeholder="Your username">
+        <input type="password" id="reset-new-password" placeholder="Choose new password">
+      </div>
+      
+      <button id="reset-submit" class="btn btn-accent" style="width: 100%;">Update Password</button>
+      <div id="reset-msg" style="margin-top: 1.2rem; font-weight: 600;"></div>
     </div>
   </div>
 
   <script src="js/login.js"></script>
   <script>
+    // Tab switching UI logic (logic handled in login.js)
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const submitBtn = document.getElementById('submit-auth');
+    const authTitle = document.getElementById('auth-title');
+
+    tabLogin.addEventListener('click', () => {
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      submitBtn.innerText = 'Sign In';
+      authTitle.innerText = 'Welcome back';
+    });
+
+    tabRegister.addEventListener('click', () => {
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      submitBtn.innerText = 'Create Account';
+      authTitle.innerText = 'Join MindSpace';
+    });
+
+    // Reset password modal logic
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('reset-modal');
       const forgotLink = document.getElementById('forgot-link');
@@ -83,18 +234,11 @@
         resetMsg.innerText = '';
       });
 
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.style.display = 'none';
-          resetMsg.innerText = '';
-        }
-      });
-
       resetSubmit.addEventListener('click', async () => {
         const username = document.getElementById('reset-username').value.trim();
         const newPassword = document.getElementById('reset-new-password').value.trim();
         if (!username || !newPassword) {
-          resetMsg.style.color = 'red';
+          resetMsg.style.color = '#ef4444';
           resetMsg.innerText = 'Please fill in both fields.';
           return;
         }
@@ -106,15 +250,15 @@
           });
           const data = await res.json();
           if (data.success) {
-            resetMsg.style.color = '#16a34a';
+            resetMsg.style.color = '#10b981';
             resetMsg.innerText = '✅ ' + data.message;
             setTimeout(() => { modal.style.display = 'none'; resetMsg.innerText = ''; }, 2000);
           } else {
-            resetMsg.style.color = 'red';
+            resetMsg.style.color = '#ef4444';
             resetMsg.innerText = data.error;
           }
         } catch (err) {
-          resetMsg.style.color = 'red';
+          resetMsg.style.color = '#ef4444';
           resetMsg.innerText = 'Network error. Try again.';
         }
       });
