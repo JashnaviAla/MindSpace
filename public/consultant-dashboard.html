@@ -8,22 +8,32 @@
   <script src="/socket.io/socket.io.js"></script>
   <style>
     :root {
-      --priority-bg: #fee2e2;
-      --priority-text: #ef4444;
-      --urgent-glow: rgba(239, 68, 68, 0.1);
+      --bg: #11111e;
+      --surface: #1a1a2e;
+      --surface2: #252545;
+      --border: rgba(140, 122, 230, 0.15);
+      --text: #ffffff;
+      --muted: #8892b0;
+      --primary: #8c7ae6;
+      --primary-glow: rgba(140, 122, 230, 0.2);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --accent: #ed4899;
     }
 
-    body { background: #f1f5f9; overflow: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; overflow: hidden; }
 
     .support-console {
       display: grid;
       grid-template-columns: 320px 1fr 300px;
-      height: calc(100vh - 100px);
-      background: white;
-      margin: 1rem 2rem;
-      border-radius: 20px;
+      height: calc(100vh - 120px);
+      background: var(--surface);
+      margin: 1rem 2.5rem;
+      border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
 
     /* 1. Sidebar: Active Chats */
@@ -34,22 +44,30 @@
       background: #fafafa;
     }
 
-    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
 
     .chat-item {
       padding: 1.2rem;
-      border-bottom: 1px solid rgba(0,0,0,0.03);
+      border-bottom: 1px solid var(--border);
       cursor: pointer;
       transition: all 0.2s;
-      position: relative;
     }
 
-    .chat-item:hover { background: #f1f5f9; }
-    .chat-item.active { background: #eff6ff; border-left: 4px solid var(--primary); }
-    .chat-item.urgent { background: var(--urgent-glow); border-left: 4px solid var(--priority-text); }
+    .chat-item:hover { background: var(--surface2); }
+    .chat-item.active { background: var(--primary-glow); border-left: 4px solid var(--primary); }
+    .chat-item.urgent { border-left: 4px solid var(--danger); animation: urgentPulse 2s infinite; }
 
-    .wait-timer { font-size: 0.7rem; color: #64748b; font-weight: 700; }
-    .urgent .wait-timer { color: var(--priority-text); }
+    @keyframes urgentPulse {
+      0% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
+      50% { box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.15); }
+      100% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
+    }
+
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+    .status-online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .status-offline { background: var(--muted); opacity: 0.5; }
+
+    .wait-timer { font-size: 0.65rem; color: var(--muted); font-weight: 700; }
 
     /* 2. Main Window: Conversation */
     .conversation-view {
@@ -84,38 +102,54 @@
       line-height: 1.5;
     }
 
-    .received { background: white; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .sent { background: var(--primary); color: white; align-self: flex-end; }
+    .received { 
+      background: var(--surface2); 
+      align-self: flex-start; 
+      border-radius: 0 15px 15px 15px;
+      border: 1px solid #30304b;
+      color: #fff;
+    }
+    .sent { 
+      background: linear-gradient(135deg, #4834d4, #686de0); 
+      color: white; 
+      align-self: flex-end; 
+      border-radius: 15px 15px 0 15px;
+      box-shadow: 0 4px 10px rgba(72, 52, 212, 0.3);
+    }
 
     /* Empathy Tools */
     .empathy-tools {
       padding: 0.8rem 2rem;
-      background: #fafafa;
-      border-top: 1px solid rgba(0,0,0,0.05);
+      background: rgba(0,0,0,0.1);
+      border-top: 1px solid var(--border);
       display: flex;
       gap: 10px;
       overflow-x: auto;
     }
 
     .canned-btn {
-      background: white;
-      border: 1px solid rgba(0,0,0,0.1);
-      padding: 5px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.75rem;
-      color: #64748b;
+      color: var(--primary);
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s;
+      font-weight: 600;
     }
 
-    .canned-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .canned-btn:hover { background: var(--primary); color: white; }
 
     .input-box {
-      padding: 1rem 2rem 2rem;
+      padding: 1.2rem 2rem 1.8rem;
+      background: var(--surface);
       display: flex;
       gap: 15px;
+      border-top: 1px solid var(--border);
     }
+    .input-box input { background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 12px; }
 
     /* 3. Context Panel */
     .context-panel {
