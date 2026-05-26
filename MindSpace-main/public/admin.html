@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Pro | MindSpace</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/socket.io/socket.io.js"></script> <!-- Added Socket.io -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #11111e;
+      --surface: #1a1a2e;
+      --surface2: #252545;
+      --border: rgba(140, 122, 230, 0.15);
+      --text: #ffffff;
+      --muted: #8892b0;
+      --primary: #8c7ae6;
+      --primary-glow: rgba(140, 122, 230, 0.2);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --accent: #ed4899;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+      text-decoration: none;
+      margin-bottom: 3rem;
+      letter-spacing: -0.03em;
+    }
+
+    .sidebar-logo img { width: 38px; height: 38px; border-radius: 10px; }
+
+    .sidebar-section {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 1rem;
+      border-radius: 14px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+    .sidebar-item.active { background: var(--primary-glow); color: var(--primary); }
+    .sidebar-item .icon { font-size: 1.1rem; width: 24px; text-align: center; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Main Content ── */
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      padding: 2.5rem 3rem;
+      overflow-y: auto;
+      min-height: 100vh;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .topbar h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .topbar-actions { display: flex; gap: 1rem; align-items: center; }
+
+    .badge-live {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-live::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .btn-pro {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.3rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-pro:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.6rem 1.3rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost:hover { color: var(--text); }
+
+    /* ── Metric Cards ── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 1200px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 1.8rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .metric-card .glow {
+      position: absolute;
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      top: -40px; right: -40px;
+      filter: blur(60px);
+      opacity: 0.2;
+    }
+
+    .metric-icon-wrap {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── Wellness Score ── */
+    .wellness-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+      border-radius: 24px;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wellness-banner::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      top: -100px; right: -80px;
+    }
+
+    .wellness-text h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .wellness-text p { opacity: 0.8; font-size: 0.95rem; }
+
+    .wellness-score-badge {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+
+    .wellness-score-badge .score { font-size: 3rem; font-weight: 900; }
+    .wellness-score-badge .score-label { font-size: 0.8rem; opacity: 0.8; font-weight: 600; }
+
+    /* ── Charts Grid ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 1100px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .chart-wrap { height: 280px; }
+
+    /* ── Tables ── */
+    .table-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+    }
+
+    .table-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: var(--surface2);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+
+    tbody tr:hover { background: var(--surface2); }
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody td {
+      padding: 1rem 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .tag-admin { background: rgba(99,102,241,0.2); color: var(--primary); }
+    .tag-user { background: rgba(16,185,129,0.15); color: var(--success); }
+
+    /* ── Alerts ── */
+    .alerts-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .alert-row {
+      background: rgba(239,68,68,0.05);
+      border: 1px solid rgba(239,68,68,0.15);
+      border-left: 4px solid var(--danger);
+      border-radius: 16px;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .alert-row:hover { transform: translateX(6px); background: rgba(239,68,68,0.08); }
+    .alert-row .emoji { font-size: 1.5rem; margin-right: 12px; }
+    .alert-row .user-id { font-weight: 700; font-size: 0.85rem; color: #fca5a5; }
+    .alert-row .note { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+    .stress-badge { background: var(--danger); color: white; padding: 4px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; }
+
+    /* ── Support Queue Expansion ── */
+    .support-container {
+      display: grid;
+      grid-template-columns: 320px 1fr 280px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      height: 700px;
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+    }
+
+    .support-sidebar {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: rgba(0,0,0,0.1);
+    }
+
+    .support-queue-list { flex: 1; overflow-y: auto; }
+
+    .support-item {
+      padding: 1.2rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .support-item:hover { background: var(--surface2); }
+    .support-item.active { background: var(--primary-glow); border-left: 4px solid var(--primary); }
+    .support-item.urgent { 
+      border-left: 4px solid var(--danger); 
+      background: rgba(239,68,68,0.08); 
+      animation: urgentPulse 2s infinite;
+    }
+
+    @keyframes urgentPulse {
+      0% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
+      50% { box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.15); }
+      100% { box-shadow: inset 0 0 0px rgba(239, 68, 68, 0); }
+    }
+
+    .support-main {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .support-messages {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .support-bubble {
+      max-width: 75%;
+      padding: 0.9rem 1.4rem;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .support-bubble.received { 
+      background: #252545; 
+      align-self: flex-start; 
+      border-radius: 0 15px 15px 15px;
+      border: 1px solid #30304b;
+      color: #fff;
+    }
+    .support-bubble.sent { 
+      background: linear-gradient(135deg, #4834d4, #686de0); 
+      color: white; 
+      align-self: flex-end; 
+      border-radius: 15px 15px 0 15px;
+      box-shadow: 0 4px 10px rgba(72, 52, 212, 0.3);
+    }
+    
+    .support-time { font-size: 0.65rem; color: var(--muted); margin-top: 4px; display: block; }
+    .sent .support-time { text-align: right; }
+
+    .empathy-toolkit {
+      display: flex;
+      gap: 10px;
+      padding: 0.5rem 2rem;
+      background: rgba(0,0,0,0.1);
+    }
+    .empathy-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .empathy-btn:hover { background: var(--primary); color: white; }
+
+    .unread-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary);
+      display: inline-block;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .status-online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .status-offline { background: var(--muted); opacity: 0.5; }
+
+    .support-input-area {
+      padding: 1.5rem 2rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+    }
+
+    .support-input-area input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.8rem 1.2rem;
+      border-radius: 12px;
+      outline: none;
+    }
+
+    .support-context {
+      padding: 1.5rem;
+      background: rgba(0,0,0,0.1);
+      border-left: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .hidden { display: none !important; }
+    
+    .status-tag {
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .status-urgent { background: var(--danger); color: white; }
+
+    /* Sound notification pulse */
+    .notif-dot { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: inline-block; margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <img src="images/logo.png" alt="MindSpace">
+      MindSpace
+    </a>
+
+    <div class="sidebar-section">Overview</div>
+    <a href="#" class="sidebar-item active">
+      <span class="icon">📊</span> Dashboard
+    </a>
+    <a href="#section-users" class="sidebar-item">
+      <span class="icon">👥</span> Users
+    </a>
+    <a href="#section-alerts" class="sidebar-item">
+      <span class="icon">🚨</span> Alerts
+    </a>
+    <a href="#" id="side-btn-support" class="sidebar-item">
+      <span class="icon">💬</span> Support Queue <span id="support-notif" class="notif-dot hidden"></span>
+    </a>
+
+    <div class="sidebar-section">Analytics</div>
+    <a href="#section-charts" class="sidebar-item">
+      <span class="icon">📈</span> Mood Trends
+    </a>
+    <a href="#section-charts" class="sidebar-item">
+      <span class="icon">🧠</span> Stress Index
+    </a>
+
+    <div class="sidebar-footer">
+      <button id="btn-logout-admin" class="btn-ghost" style="width: 100%;">🔓 Log Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- Top Bar -->
+    <div class="topbar fade-up">
+      <div>
+        <h1>Global Insights</h1>
+        <p style="color: var(--muted); margin-top: 4px; font-size: 0.9rem;">NGO Admin • Real-time community health metrics</p>
+      </div>
+      <div class="topbar-actions">
+        <span class="badge-live">Live Data</span>
+        <button class="btn-ghost" id="btn-refresh">↻ Refresh</button>
+        <button class="btn-pro" id="btn-export">⬇ Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Metric Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card fade-up delay-1">
+        <div class="glow" style="background: #6366f1;"></div>
+        <div class="metric-icon-wrap" style="background: rgba(99,102,241,0.15);">👥</div>
+        <div class="metric-label">Registered Users</div>
+        <div class="metric-value" id="stat-users" style="color: var(--primary);">--</div>
+        <div class="metric-sub">Total platform members</div>
+      </div>
+      <div class="metric-card fade-up delay-2">
+        <div class="glow" style="background: #10b981;"></div>
+        <div class="metric-icon-wrap" style="background: rgba(16,185,129,0.15);">📈</div>
+        <div class="metric-label">Mood Logs</div>
+        <div class="metric-value" id="stat-moods" style="color: var(--success);">--</div>
+        <div class="metric-sub">Total check-ins recorded</div>
+      </div>
+      <div class="metric-card fade-up delay-3">
+        <div class="glow" style="background: #f59e0b;"></div>
+        <div class="metric-icon-wrap" style="background: rgba(245,158,11,0.15);">🧘</div>
+        <div class="metric-label">Avg Stress Index</div>
+        <div class="metric-value" id="stat-stress" style="color: var(--warning);">--</div>
+        <div class="metric-sub">Scale of 0 – 10</div>
+      </div>
+      <div class="metric-card fade-up delay-4">
+        <div class="glow" style="background: #ef4444;"></div>
+        <div class="metric-icon-wrap" style="background: rgba(239,68,68,0.15);">🚨</div>
+        <div class="metric-label">High Stress Alerts</div>
+        <div class="metric-value" id="stat-alerts" style="color: var(--danger);">--</div>
+        <div class="metric-sub">Stress level ≥ 8</div>
+      </div>
+    </div>
+
+    <!-- Wellness Score Banner -->
+    <div class="wellness-banner fade-up delay-2">
+      <div class="wellness-text">
+        <h2>Community Wellness Score</h2>
+        <p>Calculated from mood logs, stress levels, and engagement.<br>Higher is healthier. Target: above 70.</p>
+      </div>
+      <div class="wellness-score-badge">
+        <div class="score" id="wellness-score">--</div>
+        <div class="score-label">/ 100</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid fade-up delay-3" id="section-charts">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">📉 Community Engagement (14 Days)</div>
+        </div>
+        <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">📊 Stress Distribution</div>
+        </div>
+        <div class="chart-wrap"><canvas id="doughnutChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel fade-up delay-3" style="margin-bottom: 2.5rem;">
+      <div class="panel-header">
+        <div class="panel-title">🧠 Stress Trajectory</div>
+      </div>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-panel fade-up delay-4" id="section-users">
+      <div class="table-header">
+        <div class="panel-title">👥 All Users</div>
+        <span style="font-size: 0.85rem; color: var(--muted);">Latest 50 accounts</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Role</th>
+            <th>🔥 Streak</th>
+            <th>Last Active</th>
+            <th>Member Since</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr><td colspan="5" style="text-align:center; padding: 3rem; color: var(--muted);">Loading users...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Priority Alerts -->
+    <div class="panel fade-up delay-5" id="section-alerts">
+      <div class="panel-header">
+        <div class="panel-title" style="color: var(--danger);">🚨 Priority Alerts — High Stress Users</div>
+      </div>
+      <div class="alerts-grid" id="alerts-list">
+        <p style="color: var(--muted); text-align:center; padding: 2rem;">Loading alerts...</p>
+      </div>
+    </div>
+
+    <!-- Integrated Support Hub -->
+    <div id="section-support" class="panel fade-up hidden" style="padding: 0; border: none;">
+      <div class="panel-header" style="padding: 1.5rem 2rem;">
+        <div class="panel-title">💬 Live Support Queue</div>
+        <button class="btn-ghost" id="btn-back-stats">← Back to Analytics</button>
+      </div>
+
+      <div class="support-container">
+        <!-- Sidebar -->
+        <aside class="support-sidebar">
+          <div class="support-queue-list" id="support-queue-items">
+            <!-- Polled via JS -->
+          </div>
+        </aside>
+
+        <!-- Main Window -->
+        <main class="support-main">
+          <div id="support-placeholder" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.3;">
+            <div style="font-size: 4rem;">📨</div>
+            <h3>Select a user to begin chat</h3>
+          </div>
+
+          <div id="support-active-chat" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="support-messages" id="support-msg-container"></div>
+            <div class="empathy-toolkit">
+              <span style="font-size: 0.7rem; color: var(--muted); align-self: center; margin-right: 5px;">Toolkit:</span>
+              <button class="empathy-btn" onclick="sendQuickMsg('I am here for you. Take your time.')">Listening 👂</button>
+              <button class="empathy-btn" onclick="sendQuickMsg('It\'s completely normal to feel this way.')">Validate ✨</button>
+              <button class="empathy-btn" onclick="sendQuickMsg('Shall we try a 2-minute breathing exercise together?')">Breathing 🧘</button>
+            </div>
+            <div class="support-input-area">
+              <input type="text" id="support-reply-input" placeholder="Type an empathetic reply...">
+              <button class="btn-pro" id="btn-send-support">Send ✨</button>
+            </div>
+          </div>
+        </main>
+
+        <!-- Context Panel -->
+        <aside class="support-context">
+          <h4 id="ctx-username">User</h4>
+          <p class="text-muted" id="ctx-id" style="font-size: 0.7rem; margin-bottom: 1rem;">ID: --</p>
+          <div style="margin-top: 1rem;">
+            <p style="font-size: 0.7rem; font-weight: 800; color: var(--muted); text-transform: uppercase;">Stress Status</p>
+            <div style="height: 6px; background: var(--bg); border-radius: 3px; margin: 8px 0; overflow: hidden;">
+              <div id="ctx-stress-fill" style="width: 0%; height: 100%; background: var(--primary);"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <p id="ctx-stress-text" style="font-weight: 700;">Loading...</p>
+              <a href="#" id="link-mood-history" style="font-size: 0.65rem; color: var(--primary); text-decoration: none; font-weight: 700;">View History →</a>
+            </div>
+          </div>
+          <button class="btn-pro" id="btn-resolve-session" style="width: 100%; margin-top: 2rem; background: var(--success);">Resolve ✅</button>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API = '/api';
+    Chart.defaults.font.family = "'Outfit', sans-serif";
+    Chart.defaults.color = '#8892b0';
+
+    // Counter animation
+    function animateCount(el, target, isDecimal = false) {
+      let start = 0;
+      const step = target / 40;
+      const timer = setInterval(() => {
+        start += step;
+        if (start >= target) { start = target; clearInterval(timer); }
+        el.innerText = isDecimal ? start.toFixed(1) : Math.floor(start);
+      }, 30);
+    }
+
+    document.getElementById('btn-logout-admin').addEventListener('click', () => {
+      localStorage.removeItem('admin_token');
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('btn-refresh').addEventListener('click', () => loadData());
+
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const rows = document.querySelectorAll('#users-tbody tr');
+      let csv = 'UserID,Role,Streak,LastActive,MemberSince\n';
+      rows.forEach(r => {
+        const cells = r.querySelectorAll('td');
+        if (cells.length > 1) {
+          csv += Array.from(cells).map(c => `"${c.innerText.trim()}"`).join(',') + '\n';
+        }
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `mindspace_users_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    });
+
+    let barChart, lineChart, doughnutChart;
+
+    async function loadData() {
+      const token = localStorage.getItem('admin_token');
+      if (!token) { window.location.href = 'admin-login.html'; return; }
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      try {
+        const [statsRes, usersRes] = await Promise.all([
+          fetch(`${API}/admin/stats`, { headers }),
+          fetch(`${API}/admin/users`, { headers })
+        ]);
+        const data = await statsRes.json();
+        const users = await usersRes.json();
+
+        if (data.error) { window.location.href = 'admin-login.html'; return; }
+
+        // Metric cards
+        animateCount(document.getElementById('stat-users'), data.totalUsers || 0);
+        animateCount(document.getElementById('stat-moods'), data.totalMoods || 0);
+        animateCount(document.getElementById('stat-stress'), parseFloat((data.avgStress || 0).toFixed(1)), true);
+        animateCount(document.getElementById('stat-alerts'), data.recentAlerts?.length || 0);
+
+        // Wellness Score (inverse of stress, scaled)
+        const wellness = Math.round(100 - ((data.avgStress || 5) / 10) * 100);
+        animateCount(document.getElementById('wellness-score'), wellness);
+
+        // Users Table
+        const tbody = document.getElementById('users-tbody');
+        tbody.innerHTML = '';
+        if (Array.isArray(users) && users.length > 0) {
+          users.forEach(u => {
+            const tr = document.createElement('tr');
+            const lastActive = u.lastActiveDate ? new Date(u.lastActiveDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Never';
+            const since = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+            const uid = (u.username || u.anonymousId || 'anonymous').substring(0, 14);
+            tr.innerHTML = `
+              <td style="font-family: monospace; font-size:0.85rem;">${uid}...</td>
+              <td><span class="tag ${u.role === 'admin' ? 'tag-admin' : 'tag-user'}">${u.role || 'user'}</span></td>
+              <td>🔥 ${u.streakCount || 0}</td>
+              <td>${lastActive}</td>
+              <td style="color: var(--muted);">${since}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--muted);">No users found.</td></tr>';
+        }
+
+        // Alerts
+        const alertList = document.getElementById('alerts-list');
+        alertList.innerHTML = '';
+        if (data.recentAlerts?.length > 0) {
+          data.recentAlerts.forEach(a => {
+            const div = document.createElement('div');
+            div.className = 'alert-row';
+            div.innerHTML = `
+              <div style="display:flex; align-items:center;">
+                <span class="emoji">${a.emoji}</span>
+                <div>
+                  <div class="user-id">${a.userId?.anonymousId?.substring(0, 12) || 'Anonymous'}...</div>
+                  <div class="note">${a.note ? `"${a.note}"` : 'No note provided.'}</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <button class="btn-pro" style="padding: 0.3rem 0.8rem; font-size: 0.7rem;" onclick="jumpToSupport('${a.userId?._id}')">Chat Now 💬</button>
+                <span class="stress-badge">LV ${a.stressLevel}</span>
+              </div>
+            `;
+            alertList.appendChild(div);
+          });
+        } else {
+          alertList.innerHTML = '<p style="text-align:center; padding: 2rem; color: var(--muted);">✅ No high-stress alerts right now. Community is doing well!</p>';
+        }
+
+        // Charts
+        const timeLabels = data.moodsOverTime?.map(i => i._id) || [];
+        const engageData = data.moodsOverTime?.map(i => i.count) || [];
+        const stressLine = data.moodsOverTime?.map(i => i.avgStress || 0) || [];
+
+        if (barChart) barChart.destroy();
+        barChart = new Chart(document.getElementById('barChart'), {
+          type: 'bar',
+          data: {
+            labels: timeLabels,
+            datasets: [{
+              label: 'Interactions',
+              data: engageData,
+              backgroundColor: 'rgba(99,102,241,0.7)',
+              borderRadius: 10,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+
+        if (lineChart) lineChart.destroy();
+        lineChart = new Chart(document.getElementById('lineChart'), {
+          type: 'line',
+          data: {
+            labels: timeLabels,
+            datasets: [{
+              label: 'Avg Stress',
+              data: stressLine,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239,68,68,0.08)',
+              fill: true,
+              tension: 0.4,
+              pointRadius: 5,
+              pointBackgroundColor: '#ef4444'
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { max: 10, beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+
+        if (doughnutChart) doughnutChart.destroy();
+        const distData = data.stressDistribution || [];
+        doughnutChart = new Chart(document.getElementById('doughnutChart'), {
+          type: 'doughnut',
+          data: {
+            labels: distData.map(i => `Level ${i._id}`),
+            datasets: [{
+              data: distData.map(i => i.count),
+              backgroundColor: ['#10b981','#38b2ac','#6366f1','#8b5cf6','#ec4899','#ef4444'],
+              borderWidth: 0,
+              hoverOffset: 15
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: { legend: { position: 'right', labels: { color: '#8892b0', font: { size: 12 } } } }
+          }
+        });
+
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+      }
+    }
+
+    // --- Support Logic ---
+    const socket = io();
+    let currentSupportUser = null;
+    let currentSessionId = null;
+    const userStatuses = {}; // { userId: 'online' | 'offline' }
+    const unreadCounts = {}; // { userId: Number }
+
+    // View Toggling
+    const sideBtnSupport = document.getElementById('side-btn-support');
+    const statsSections = ['section-charts', 'section-users', 'section-alerts', 'metrics-grid', 'wellness-banner'];
+    
+    function showSupportView() {
+      statsSections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      document.getElementById('section-support').classList.remove('hidden');
+      sideBtnSupport.classList.add('active');
+      document.querySelector('.sidebar-item[href="#"]').classList.remove('active');
+      fetchSupportSessions();
+    }
+
+    function showDashboardView() {
+      statsSections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('hidden');
+      });
+      document.getElementById('section-support').classList.add('hidden');
+      sideBtnSupport.classList.remove('active');
+      document.querySelector('.sidebar-item[href="#"]').classList.add('active');
+    }
+
+    sideBtnSupport.onclick = (e) => { e.preventDefault(); showSupportView(); };
+    document.getElementById('btn-back-stats').onclick = showDashboardView;
+
+    // Fetch Sessions
+    async function fetchSupportSessions() {
+      const res = await fetch(`${API}/chat/active-sessions`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` } });
+      const data = await res.json();
+      renderSupportQueue(data);
+    }
+
+    function renderSupportQueue(sessions) {
+      const list = document.getElementById('support-queue-items');
+      list.innerHTML = '';
+      sessions.forEach(s => {
+        const div = document.createElement('div');
+        const lastUpdate = new Date(s.updatedAt);
+        const diffMins = Math.floor((new Date() - lastUpdate) / 60000);
+        const isUrgent = diffMins >= 2 && s.lastSender === 'user';
+        const isOnline = userStatuses[s.userId] === 'online';
+        const unread = unreadCounts[s.userId] || 0;
+        
+        div.className = `support-item ${currentSessionId === s.sessionId ? 'active' : ''} ${isUrgent ? 'urgent' : ''}`;
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <div style="display:flex; align-items:center;">
+              <span class="status-dot ${isOnline ? 'status-online' : 'status-offline'}"></span>
+              <span style="font-weight:700;">${s.username}</span>
+              ${unread > 0 ? '<span class="unread-dot" style="margin-left:8px;"></span>' : ''}
+            </div>
+            <span style="font-size:0.6rem; color:var(--muted);">${diffMins}m ago</span>
+          </div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:4px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+            ${s.lastMessage || '...'}
+          </div>
+        `;
+        div.onclick = () => {
+          unreadCounts[s.userId] = 0; // Clear unread on click
+          selectSupportSession(s);
+        };
+        list.appendChild(div);
+      });
+    }
+
+    async function selectSupportSession(s) {
+      currentSupportUser = s.userId;
+      currentSessionId = s.sessionId;
+      document.getElementById('support-placeholder').classList.add('hidden');
+      document.getElementById('support-active-chat').classList.remove('hidden');
+      document.getElementById('ctx-username').innerText = s.username;
+      document.getElementById('ctx-id').innerText = `ID: ${s.userId.substring(0,8)}`;
+      document.getElementById('ctx-stress-fill').style.width = `${s.stressLevel * 10}%`;
+      document.getElementById('ctx-stress-text').innerText = `${s.stressLevel}/10 Stress`;
+
+      socket.emit('join_chat', { userId: s.userId });
+      
+      const res = await fetch(`${API}/chat/history/${s.userId}/consultant_pool`);
+      const history = await res.json();
+      const msgBox = document.getElementById('support-msg-container');
+      msgBox.innerHTML = '';
+      history.forEach(m => appendSupportMsg(m));
+      fetchSupportSessions();
+    }
+
+    function appendSupportMsg(m) {
+      const msgBox = document.getElementById('support-msg-container');
+      const currentUserId = JSON.parse(localStorage.getItem('mindspace_user'))._id;
+      const isSelf = m.isConsultant || (m.senderId && m.senderId.toString() === currentUserId.toString());
+      
+      const div = document.createElement('div');
+      div.className = `support-bubble ${isSelf ? 'sent' : 'received'}`;
+      
+      const timeStr = new Date(m.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      div.innerHTML = `
+        <div>${m.message || m.text}</div>
+        <span class="support-time">${timeStr}</span>
+      `;
+      msgBox.appendChild(div);
+      
+      // Auto-Scroll to Bottom
+      msgBox.scrollTop = msgBox.scrollHeight;
+      
+      // Clear typing indicator
+      const el = document.getElementById('typing-indicator');
+      if (el) el.remove();
+    }
+
+    document.getElementById('btn-send-support').onclick = sendSupportReply;
+    document.getElementById('support-reply-input').onkeypress = (e) => { if(e.key === 'Enter') sendSupportReply(); };
+
+    function sendSupportReply(textOverride) {
+      const input = document.getElementById('support-reply-input');
+      const text = textOverride || input.value.trim();
+      if (!text || !currentSupportUser) return;
+      
+      socket.emit('send_message', {
+        userId: currentSupportUser, // Room ID
+        sender: 'admin',
+        text: text,
+        senderId: JSON.parse(localStorage.getItem('mindspace_user'))._id,
+        receiverId: currentSupportUser,
+        isConsultant: true
+      });
+      if (!textOverride) input.value = '';
+      
+      // Stop typing
+      socket.emit('support_stop_typing', { userId: JSON.parse(localStorage.getItem('mindspace_user'))._id, isConsultant: true, partnerId: currentSupportUser });
+    }
+
+    function sendQuickMsg(val) {
+      sendSupportReply(val);
+    }
+
+    // Typing Logic
+    let typingTimeout;
+    document.getElementById('support-reply-input').oninput = () => {
+      socket.emit('support_typing', { userId: currentSupportUser, isConsultant: true, partnerId: currentSupportUser });
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        socket.emit('support_stop_typing', { userId: currentSupportUser, isConsultant: true, partnerId: currentSupportUser });
+      }, 2000);
+    };
+
+    socket.on('support_typing_status', (data) => {
+      if (data.isTyping && !document.getElementById('typing-indicator')) {
+        const div = document.createElement('div');
+        div.id = 'typing-indicator';
+        div.className = 'support-bubble received';
+        div.style.fontStyle = 'italic';
+        div.style.opacity = '0.7';
+        div.innerText = 'User is typing...';
+        document.getElementById('support-msg-container').appendChild(div);
+        document.getElementById('support-msg-container').scrollTop = document.getElementById('support-msg-container').scrollHeight;
+      } else if (!data.isTyping) {
+        const el = document.getElementById('typing-indicator');
+        if (el) el.remove();
+      }
+    });
+
+    socket.on('receive_message', (data) => {
+      // Comparison safety
+      if (currentSupportUser && (currentSupportUser.toString() === data.senderId.toString() || currentSupportUser.toString() === data.receiverId.toString())) {
+        appendSupportMsg(data);
+      } else if (!data.isConsultant) {
+        // Mark as unread if not currently viewing
+        unreadCounts[data.senderId] = (unreadCounts[data.senderId] || 0) + 1;
+      }
+      
+      // Update sidebar snippet in real-time
+      const sidebarItem = document.querySelector(`.support-item[onclick*="${data.senderId}"]`) || document.querySelector(`.support-item[onclick*="${data.receiverId}"]`);
+      if (sidebarItem) {
+        const snippet = sidebarItem.querySelector('div:last-child');
+        if (snippet) snippet.innerText = data.message || data.text;
+      }
+      
+      fetchSupportSessions();
+    });
+
+    socket.on('user_status_update', (data) => {
+      userStatuses[data.userId] = data.status;
+      fetchSupportSessions();
+    });
+
+    socket.on('support_queue_update', () => {
+      document.getElementById('support-notif').classList.remove('hidden');
+      fetchSupportSessions();
+    });
+
+    async function jumpToSupport(userId) {
+      showSupportView();
+      // Wait for sessions to load
+      setTimeout(async () => {
+        const res = await fetch(`${API}/chat/active-sessions`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` } });
+        const sessions = await res.json();
+        const found = sessions.find(s => s.userId === userId);
+        if (found) selectSupportSession(found);
+        else {
+          console.log("No active session found for user yet.");
+        }
+      }, 500);
+    }
+
+    document.getElementById('btn-resolve-session').onclick = async () => {
+      if (!currentSessionId) return;
+      try {
+        await fetch(`${API}/chat/resolve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: currentSessionId })
+        });
+        currentSessionId = null;
+        currentSupportUser = null;
+        document.getElementById('support-active-chat').classList.add('hidden');
+        document.getElementById('support-placeholder').classList.remove('hidden');
+        fetchSupportSessions();
+      } catch (err) { console.error('Resolve error:', err); }
+    };
+
+    loadData();
+    setInterval(loadData, 60000); 
+  </script>
+</body>
+</html>

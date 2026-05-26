@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talk to a Consultant | MindSpace</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      min-height: 100vh;
+      color: white;
+    }
+
+    .support-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      height: calc(100vh - 180px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .support-header {
+      padding: 1.5rem 2rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .support-status {
+      width: 10px; height: 10px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10b981;
+    }
+
+    .chat-window {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      background: rgba(15, 23, 42, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+
+    .chat-window::-webkit-scrollbar { width: 6px; }
+    .chat-window::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    .bubble {
+      max-width: 70%;
+      padding: 1rem 1.4rem;
+      border-radius: 22px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      font-weight: 500;
+      animation: bubblePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes bubblePop {
+      from { opacity: 0; transform: scale(0.9) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .user-bubble {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #4834d4, #686de0);
+      color: white;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 10px 15px -3px rgba(72, 52, 212, 0.3);
+    }
+
+    .consultant-bubble {
+      align-self: flex-start;
+      background: #1a1a2e;
+      color: white;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #30304b;
+    }
+    
+    .chat-time {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.4);
+      margin-top: 5px;
+      display: block;
+    }
+    .user-bubble .chat-time { text-align: right; }
+
+    .input-area {
+      padding: 1.5rem 2rem;
+      background: rgba(255,255,255,0.03);
+      display: flex;
+      gap: 15px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      align-items: center;
+    }
+
+    #chat-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 30px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    #chat-input:focus { border-color: #6366f1; background: rgba(255,255,255,0.08); }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="home.html" class="logo">
+      <img src="images/logo.png" alt="MindSpace" style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
+      MindSpace
+    </a>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="diary.html">Diary</a>
+      <a href="chat.html">Community</a>
+      <a href="support-chat.html" class="active">Support</a>
+      <a href="#" id="btn-logout" style="color: #ef4444; font-weight: 700;">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="glass-container support-container fade-in">
+      <div class="support-header">
+        <h2 style="margin-bottom: 8px;">MindSpace Support</h2>
+        <p class="text-muted" style="font-size: 0.9rem;">Empathetic guidance from certified NGO consultants.</p>
+      </div>
+
+      <div class="chat-window" id="chat-window">
+        <!-- Messages here -->
+        <div style="text-align: center; margin: auto; max-width: 400px; padding: 2rem;">
+          <div style="font-size: 3.5rem; margin-bottom: 1.5rem;">💙</div>
+          <h3>How are you feeling today?</h3>
+          <p class="text-muted">Describe whatever is on your mind. A consultant will review your message and reply as soon as they can.</p>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <input type="text" id="chat-input" placeholder="Tell us what's on your mind..." autocomplete="off">
+        <button id="send-btn" class="btn btn-primary" style="padding: 0.7rem 1.5rem;">Send ✨</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/support-chat.js"></script>
+  <script>
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      localStorage.removeItem('mindspace_user');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

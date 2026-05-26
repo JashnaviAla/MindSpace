@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | MindSpace</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome for Input Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: url('images/login-bg.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .auth-card {
+      background: #ffffff;
+      width: 440px;
+      max-width: 90%;
+      padding: 3rem 2.5rem;
+      border-radius: 40px;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.1);
+      text-align: center;
+      animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .icon-box {
+      width: 56px;
+      height: 56px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    .icon-box i {
+      font-size: 1.4rem;
+      color: #1e293b;
+    }
+
+    h2 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.03em;
+    }
+
+    p.subtitle {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    .tab-container {
+      display: flex;
+      background: #f1f5f9;
+      padding: 0.4rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      background: transparent;
+      border-radius: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #64748b;
+      font-size: 0.9rem;
+      z-index: 2;
+      transition: color 0.3s;
+    }
+
+    .tab-btn.active {
+      color: #1e293b;
+    }
+
+    .tab-highlight {
+      position: absolute;
+      top: 0.4rem;
+      left: 0.4rem;
+      width: calc(50% - 0.4rem);
+      height: calc(100% - 0.8rem);
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
+    }
+
+    .tab-btn[data-mode="register"].active ~ .tab-highlight {
+      transform: translateX(100%);
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 1.2rem;
+    }
+
+    .input-group i {
+      position: absolute;
+      left: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 1rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 1.1rem 1.1rem 1.1rem 3.2rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: #1e293b;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .input-group input:focus {
+      background: #ffffff;
+      border-color: #1e293b;
+      box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.05);
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: 0.85rem;
+      color: #64748b;
+      text-decoration: none;
+      font-weight: 600;
+      margin: -0.5rem 0.5rem 1.5rem 0;
+    }
+
+    .btn-main {
+      width: 100%;
+      padding: 1.1rem;
+      background: #1e293b;
+      color: #ffffff;
+      border: none;
+      border-radius: 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-main:hover {
+      background: #000000;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1.5rem;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    .social-btn {
+      width: 100%;
+      padding: 1rem;
+      background: #ffffff;
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .social-btn:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover { color: #64748b; }
+
+    #auth-error {
+      color: #ef4444;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    /* Modal Styling */
+    #reset-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      padding: 2.5rem;
+      border-radius: 32px;
+      width: 400px;
+      max-width: 90%;
+      text-align: center;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #f1f5f9;
+      border: none;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <main class="auth-card">
+    <div class="icon-box">
+      <i class="fa-solid fa-arrow-right-to-bracket"></i>
+    </div>
+    
+    <h2 id="auth-title">Sign in to MindSpace</h2>
+    <p class="subtitle" id="auth-subtitle">Your journey to mental wellness starts here.</p>
+
+    <div class="tab-container">
+      <button id="tab-login" class="tab-btn active" data-mode="login">Email Sign In</button>
+      <button id="tab-register" class="tab-btn" data-mode="register">Create Account</button>
+      <div class="tab-highlight"></div>
+    </div>
+
+    <div id="auth-error"></div>
+
+    <form id="auth-form">
+      <div class="input-group">
+        <i class="fa-solid fa-user"></i>
+        <input type="text" id="username" placeholder="Username" required>
+      </div>
+      
+      <div class="input-group">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" id="password" placeholder="Password" required>
+      </div>
+      
+      <a href="#" id="forgot-link" class="forgot-link">Forgot password?</a>
+      
+      <button type="submit" id="submit-auth" class="btn-main">Get Started</button>
+    </form>
+
+    <div class="divider">or continue with</div>
+
+    <button id="btn-anonymous" class="social-btn">
+      <i class="fa-solid fa-user-secret"></i> Continue Anonymously
+    </button>
+    
+    <a href="index.html" class="back-link">&larr; Back to landing page</a>
+  </main>
+
+  <!-- Modal -->
+  <div id="reset-modal">
+    <div class="modal-content">
+      <button id="close-reset" class="close-btn">&times;</button>
+      <h2>Reset Password</h2>
+      <p class="subtitle" style="margin-bottom: 1.5rem;">Enter your credentials to update.</p>
+      <div class="input-group">
+        <i class="fa-solid fa-user"></i>
+        <input type="text" id="reset-username" placeholder="Username">
+      </div>
+      <div class="input-group">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" id="reset-new-password" placeholder="New Password">
+      </div>
+      <button id="reset-submit" class="btn-main" style="margin-top: 1rem;">Update Password</button>
+      <div id="reset-msg" style="margin-top: 1rem; font-size: 0.9rem;"></div>
+    </div>
+  </div>
+
+  <script src="js/login.js"></script>
+</body>
+</html>

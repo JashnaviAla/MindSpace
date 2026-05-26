@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NGO Mentor Chat | MindSpace</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    :root {
+      --bg: #11111e;
+      --surface: #1a1a2e;
+      --surface2: #252545;
+      --border: rgba(140, 122, 230, 0.15);
+      --text: #ffffff;
+      --muted: #8892b0;
+      --primary: #8c7ae6;
+      --primary-glow: rgba(140, 122, 230, 0.2);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --accent: #ed4899;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; }
+
+    .chat-container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      height: 750px;
+      overflow: hidden;
+      padding: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      margin: 2rem auto;
+      max-width: 1100px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .mentor-list {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 1.5rem;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .mentor-item {
+      padding: 1rem;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+
+    .mentor-item:hover { background: var(--primary-glow); transform: translateX(5px); }
+    .mentor-item.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .message-area {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .chat-window {
+      flex: 1;
+      padding: 2.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .msg-bubble {
+      max-width: 70%;
+      padding: 1rem 1.4rem;
+      border-radius: 18px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .user-msg {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #4834d4, #686de0);
+      color: white;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 10px rgba(72, 52, 212, 0.3);
+    }
+
+    .mentor-msg {
+      align-self: flex-start;
+      background: var(--surface2);
+      color: white;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #30304b;
+    }
+
+    .chat-input-wrapper {
+      padding: 1.5rem 2rem;
+      background: var(--surface);
+      display: flex;
+      gap: 15px;
+      border-top: 1px solid var(--border);
+      align-items: center;
+    }
+    
+    .chat-input-wrapper input { background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 12px; margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="home.html" class="logo">
+      <img src="images/logo.png" alt="MindSpace" style="height: 38px; width: 38px; border-radius: 10px; vertical-align: middle;">
+      MindSpace
+    </a>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="diary.html">Diary</a>
+      <a href="chat.html">Community</a>
+      <a href="mentor-chat.html" class="active">Mentors</a>
+      <a href="#" id="btn-logout" style="color: #ef4444; font-weight: 700;">Logout</a>
+    </nav>
+  </header>
+
+  <main class="glass-container chat-container fade-in">
+    <div class="mentor-list" id="mentor-list">
+      <h3 style="margin-bottom: 1.5rem;">NGO Mentors</h3>
+      <!-- Mentors populated here -->
+      <div class="text-muted">Loading mentors...</div>
+    </div>
+
+    <div class="message-area">
+      <div class="chat-window" id="chat-window">
+        <div style="text-align: center; margin: auto; padding: 2rem;">
+          <div style="font-size: 4rem; margin-bottom: 1.5rem;">👋</div>
+          <h3>Consult a Mentor</h3>
+          <p class="text-muted">Select a mentor from the left to start a private conversation.</p>
+        </div>
+      </div>
+
+      <div class="chat-input-wrapper" id="input-area" style="display: none;">
+        <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off">
+        <button id="send-btn" class="btn btn-primary" style="padding: 0.7rem 1.5rem;">Send ✨</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/mentor-chat.js"></script>
+  <script>
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      localStorage.removeItem('mindspace_user');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
