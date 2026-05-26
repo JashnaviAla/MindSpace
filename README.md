@@ -68,7 +68,6 @@ The goal is to combine technology with mental health awareness to promote emotio
 
 ## 📸 Screenshots
 
-Add your project screenshots here.
 
 ### 🏠 Home Dashboard
 ![Home Page](Home.PNG)
