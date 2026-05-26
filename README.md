@@ -71,18 +71,18 @@ The goal is to combine technology with mental health awareness to promote emotio
 Add your project screenshots here.
 
 ### 🏠 Home Dashboard
-![Home Page](images/Home.png)
+![Home Page](images/Home.PNG)
 
 ### 🔐 Login Page
-![Login Page](images/Login.png)
+![Login Page](images/Login.PNG)
 
 
 ### 💬 Chat System
-![Chat System](images/Chat.png)
+![Chat System](images/Chat.PNG)
 
 ### 📖 Diary Page
-![Diary](images/Diary.png)
+![Diary](images/Diary.PNG)
 
 ### 😊 Support
-![Support](images/Support.png)
+![Support](images/Support.PNG)
 
